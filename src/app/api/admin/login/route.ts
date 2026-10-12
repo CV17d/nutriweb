@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { createSession } from '../../../../lib/auth';
 import { checkRateLimit, getClientIp } from '../../../../lib/rate-limit';
 import { withErrorHandler } from '../../../../lib/api-handler';
+import { logSecurityEvent } from '../../../../lib/security-logger';
 
 /**
  * Comparación segura en tiempo constante usando SHA-256 para evitar Timing Attacks.
@@ -20,10 +21,24 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function loginHandler(request: Request) {
   const ip = getClientIp(request);
+  const userAgent = request.headers.get('user-agent') || 'unknown';
 
   // 1. Rate Limiting persistente en BD: máximo 5 intentos en 15 minutos por IP
   const rateLimit = await checkRateLimit(`login:${ip}`, 5, 15 * 60);
   if (!rateLimit.success) {
+    // Registrar el evento permanente de bloqueo y disparar alerta por correo si aplica
+    await logSecurityEvent({
+      eventType: 'LOGIN_RATE_LIMIT_EXCEEDED',
+      ip,
+      path: '/api/admin/login',
+      details: {
+        attempts: 5,
+        resetAt: rateLimit.resetAt,
+        message: 'Límite de intentos superado. IP bloqueada por 15 minutos.',
+      },
+      userAgent,
+    });
+
     await delay(1500);
     return NextResponse.json(
       { error: 'Demasiados intentos fallidos. Acceso bloqueado temporalmente por 15 minutos.' },
@@ -48,6 +63,17 @@ async function loginHandler(request: Request) {
   const isPasswordValid = safeCompare(password, adminPassword);
 
   if (!isPasswordValid) {
+    // Registrar el intento fallido
+    await logSecurityEvent({
+      eventType: 'LOGIN_FAILED_ATTEMPT',
+      ip,
+      path: '/api/admin/login',
+      details: {
+        remainingAttempts: rateLimit.remaining,
+      },
+      userAgent,
+    });
+
     // 3. Tarpit: demorar deliberadamente la respuesta incorrecta
     await delay(1200);
     return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 });
@@ -55,6 +81,15 @@ async function loginHandler(request: Request) {
 
   // Passwords match, create session
   await createSession();
+
+  // Registrar login exitoso
+  await logSecurityEvent({
+    eventType: 'LOGIN_SUCCESS',
+    ip,
+    path: '/api/admin/login',
+    details: { role: 'admin' },
+    userAgent,
+  });
 
   return NextResponse.json({ success: true });
 }

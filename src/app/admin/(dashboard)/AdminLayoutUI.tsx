@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,6 +9,39 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
   const pathname = usePathname();
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  // Monitor de inactividad de 30 minutos e interceptor de 401 en el cliente
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    const INACTIVITY_LIMIT_MS = 30 * 60 * 1000; // 30 minutos
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        window.location.href = '/admin/login?reason=inactivity';
+      }, INACTIVITY_LIMIT_MS);
+    };
+
+    const activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+    activityEvents.forEach((ev) => window.addEventListener(ev, resetTimer));
+    resetTimer();
+
+    // Interceptar fetch para detectar respuestas 401 (sesión expirada en servidor)
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      if (response.status === 401 && !window.location.pathname.startsWith('/admin/login')) {
+        window.location.href = '/admin/login?reason=expired';
+      }
+      return response;
+    };
+
+    return () => {
+      clearTimeout(timeoutId);
+      activityEvents.forEach((ev) => window.removeEventListener(ev, resetTimer));
+      window.fetch = originalFetch;
+    };
+  }, []);
 
   const navLinks = [
     { name: 'Dashboard', href: '/admin', icon: 'dashboard' },

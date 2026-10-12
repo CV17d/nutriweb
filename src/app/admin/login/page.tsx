@@ -1,18 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [sessionNotice, setSessionNotice] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const reason = params.get('reason');
+      if (reason === 'expired' || reason === 'inactivity') {
+        setSessionNotice('Tu sesión ha expirado por inactividad. Por favor, inicia sesión nuevamente.');
+      }
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSessionNotice('');
     setLoading(true);
 
     try {
@@ -31,7 +42,7 @@ export default function LoginPage() {
         const data = await res.json();
         setError(data.error || 'Error al iniciar sesión');
       }
-    } catch (err) {
+    } catch {
       setError('Error de conexión');
     } finally {
       setLoading(false);
@@ -49,6 +60,14 @@ export default function LoginPage() {
             Ingresa tu contraseña maestra para continuar
           </p>
         </div>
+
+        {sessionNotice && (
+          <div className="text-amber-800 text-sm font-medium bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-center gap-2">
+            <span className="material-symbols-outlined text-amber-600 text-lg">info</span>
+            <span>{sessionNotice}</span>
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>

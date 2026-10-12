@@ -268,3 +268,61 @@ export async function sendReminderEmail(
   }
 }
 
+/**
+ * Envía una alerta de seguridad al administrador tras detectarse ataques o bloqueos por fuerza bruta
+ */
+export async function sendSecurityAlertEmail(
+  toEmail: string,
+  event: {
+    ip: string;
+    path: string;
+    attempts: number;
+    timestamp: Date;
+    userAgent?: string;
+  }
+) {
+  try {
+    const resend = getResendClient();
+    const dateStr = event.timestamp.toLocaleString('es-ES', {
+      timeZone: 'America/Guayaquil',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+
+    const { data, error } = await resend.emails.send({
+      from: 'Alerta de Seguridad <seguridad@andresburbanonutricionista.com>',
+      to: [toEmail],
+      subject: `🚨 ALERTA: Bloqueo de Fuerza Bruta Detectado (IP: ${event.ip})`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1f2937; border: 2px solid #ef4444; border-radius: 8px;">
+          <h2 style="color: #b91c1c; margin-top: 0;">⚠️ Alerta de Seguridad del Sistema</h2>
+          <p>Se ha activado una medida defensiva de <strong>Rate Limiting y Bloqueo</strong> debido a múltiples intentos fallidos de autenticación en el panel administrativo.</p>
+          
+          <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; margin: 16px 0;">
+            <p style="margin: 4px 0;"><strong>Dirección IP Bloqueada:</strong> <code>${event.ip}</code></p>
+            <p style="margin: 4px 0;"><strong>Ruta Objetivo:</strong> <code>${event.path}</code></p>
+            <p style="margin: 4px 0;"><strong>Intentos Realizados:</strong> ${event.attempts}</p>
+            <p style="margin: 4px 0;"><strong>Fecha y Hora:</strong> ${dateStr} (GMT-5)</p>
+            ${event.userAgent ? `<p style="margin: 4px 0;"><strong>User Agent:</strong> <small>${event.userAgent}</small></p>` : ''}
+          </div>
+
+          <p style="font-size: 14px; color: #4b5563;">La dirección IP sospechosa ha sido bloqueada temporalmente por la base de datos de Rate Limiting. No se requiere ninguna acción si tu contraseña administrativa es segura.</p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      logger.error('Error enviando alerta de seguridad por correo:', error);
+      return null;
+    }
+    return data;
+  } catch (error) {
+    logger.error('Excepción al intentar enviar correo de alerta de seguridad:', error);
+    return null;
+  }
+}
+

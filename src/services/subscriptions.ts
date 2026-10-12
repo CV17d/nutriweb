@@ -14,13 +14,20 @@ export async function createSubscription(clientId: string, planId: number, trans
   const insertQuery = `
     INSERT INTO client_subscriptions (client_id, plan_id, transaction_id, total_sessions, sessions_remaining, sessions_used, status)
     VALUES ($1, $2, $3, $4, $5, 0, 'active')
+    ON CONFLICT (transaction_id) DO NOTHING
     RETURNING id;
   `;
 
   const result = await query(insertQuery, [clientId, planId, transactionId, totalSessions, totalSessions]);
-  const subscriptionId = result.rows[0].id;
+  let subscriptionId = result.rows[0]?.id;
   
-  logger.info({ message: 'Suscripción creada exitosamente', subscriptionId, clientId });
+  if (!subscriptionId) {
+    // Si ya existía debido a una ejecución concurrente idempotente, recuperamos su ID
+    const existing = await query('SELECT id FROM client_subscriptions WHERE transaction_id = $1', [transactionId]);
+    subscriptionId = existing.rows[0]?.id;
+  }
+  
+  logger.info({ message: 'Suscripción procesada exitosamente', subscriptionId, clientId, transactionId });
   return subscriptionId;
 }
 

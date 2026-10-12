@@ -1,28 +1,47 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { logger } from './lib/logger';
-import { verifySession } from './lib/auth';
+import { verifySession, signRefreshedSession, COOKIE_NAME } from './lib/auth';
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const sessionValue = request.cookies.get(COOKIE_NAME)?.value;
 
   // Protect /admin routes (except /admin/login)
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
-    const session = request.cookies.get('admin_session')?.value;
-    const verified = await verifySession(session);
+    const verified = await verifySession(sessionValue);
     
-    if (!verified) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+    if (!verified || verified.role !== 'admin') {
+      const redirectRes = NextResponse.redirect(new URL('/admin/login?reason=expired', request.url));
+      redirectRes.cookies.delete(COOKIE_NAME);
+      return redirectRes;
     }
   }
 
   // Protect /api/admin routes (except /api/admin/login)
   if (pathname.startsWith('/api/admin') && !pathname.startsWith('/api/admin/login')) {
-    const session = request.cookies.get('admin_session')?.value;
-    const verified = await verifySession(session);
+    const verified = await verifySession(sessionValue);
     
-    if (!verified) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!verified || verified.role !== 'admin') {
+      const unauthRes = NextResponse.json(
+        { error: 'Unauthorized', message: 'Sesión caducada por inactividad o inválida' },
+        { status: 401 }
+      );
+      unauthRes.cookies.delete(COOKIE_NAME);
+      return unauthRes;
+    }
+  }
+
+  // Deslizamiento de sesión (Sliding Session): refrescar si la sesión es válida y pasaron > 2 min de actividad
+  let refreshedToken: string | null = null;
+  if (sessionValue && (pathname.startsWith('/admin') || pathname.startsWith('/api/admin'))) {
+    const verified = await verifySession(sessionValue);
+    if (verified && Date.now() - verified.lastActive > 2 * 60 * 1000) {
+      try {
+        refreshedToken = await signRefreshedSession(verified);
+      } catch (err) {
+        logger.error('Error refrescando sesión deslizante en proxy', err);
+      }
     }
   }
 
@@ -43,6 +62,17 @@ export default async function proxy(request: NextRequest) {
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
+
+  // Si se refrescó la sesión, actualizar la cookie en la respuesta HTTP
+  if (refreshedToken) {
+    response.cookies.set(COOKIE_NAME, refreshedToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 8 * 60 * 60, // 8 horas
+    });
+  }
   
   return response;
 }
