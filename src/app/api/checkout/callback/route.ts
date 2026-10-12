@@ -4,8 +4,9 @@ import { createSubscription } from '../../../../services/subscriptions';
 import { createAppointment } from '../../../../services/appointments';
 import { payphone } from '../../../../services/payphone';
 import { logger } from '../../../../lib/logger';
+import { withErrorHandler } from '../../../../lib/api-handler';
 
-export async function GET(request: Request) {
+async function callbackHandler(request: Request) {
   const { searchParams } = new URL(request.url);
   
   // Payphone redirige con 'id' y 'clientTransactionId'
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
     if (confirmResult.statusCode !== 3 && confirmResult.transactionStatus !== 'Approved') {
       logger.warn({ message: 'Transacción cancelada o rechazada en Payphone', confirmResult });
       await updateTransactionStatus(clientTransactionId, 'failed', String(payphoneId));
-      return NextResponse.redirect(new URL(`/checkout/error?reason=${encodeURIComponent(confirmResult.message || 'pago_no_aprobado')}`, request.url));
+      return NextResponse.redirect(new URL('/checkout/error?reason=pago_no_aprobado', request.url));
     }
 
     // 2. Transacción aprobada: actualizar registro en la BD
@@ -79,3 +80,5 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/checkout/error?reason=processing_failed', request.url));
   }
 }
+
+export const GET = withErrorHandler(callbackHandler);

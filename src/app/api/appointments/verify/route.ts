@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { confirmFreeAppointment } from '../../../../services/appointments';
 import { logger } from '../../../../lib/logger';
+import { withErrorHandler } from '../../../../lib/api-handler';
 
-export async function GET(request: Request) {
+async function verifyHandler(request: Request) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
 
-  if (!token) {
+  if (!token || typeof token !== 'string') {
     return NextResponse.redirect(new URL('/verify-success?error=missing_token', request.url));
   }
 
@@ -34,3 +35,5 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/verify-success?error=invalid_token', request.url));
   }
 }
+
+export const GET = withErrorHandler(verifyHandler);
