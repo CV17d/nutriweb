@@ -139,23 +139,24 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
         throw new Error(data.message || 'Error al iniciar el proceso de pago.');
       }
 
-      setPayphoneConfig(data.payphone);
+      const clientToken = process.env.NEXT_PUBLIC_PAYPHONE_TOKEN || data.payphone?.token || '';
+      const finalPayphoneConfig = {
+        ...data.payphone,
+        token: clientToken,
+      };
+
+      setPayphoneConfig(finalPayphoneConfig);
       setPayphoneReady(true);
       setLoading(false);
 
       // Renderizar el botón de la Cajita de Pagos de Payphone
       setTimeout(() => {
-        const clientToken = process.env.NEXT_PUBLIC_PAYPHONE_TOKEN || data.payphone?.token;
-        if (typeof window !== 'undefined' && (window as any).PPaymentButtonBox && (clientToken || data.payphone)) {
+        if (typeof window !== 'undefined' && (window as any).PPaymentButtonBox && clientToken) {
           const container = document.getElementById('pp-button');
           if (container) {
             container.innerHTML = '';
             try {
-              const boxConfig = {
-                ...data.payphone,
-                ...(clientToken ? { token: clientToken } : {}),
-              };
-              const ppb = new (window as any).PPaymentButtonBox(boxConfig);
+              const ppb = new (window as any).PPaymentButtonBox(finalPayphoneConfig);
               ppb.render('pp-button');
             } catch (errRender) {
               console.error('Error al renderizar botón de Payphone', errRender);
@@ -470,13 +471,13 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                 <p className="text-xs text-gray-700">Haz clic en el botón de Payphone a continuación para pagar sin salir de la página:</p>
               </div>
 
-              {payphoneConfig?.token ? (
+              {payphoneConfig?.token || process.env.NEXT_PUBLIC_PAYPHONE_TOKEN ? (
                 <div className="py-2 flex justify-center">
                   <div id="pp-button" className="w-full flex justify-center min-h-[50px]"></div>
                 </div>
               ) : (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
-                  <strong>Atención:</strong> Falta configurar la variable <code>PAYPHONE_TOKEN</code> en el archivo <code>.env</code> de tu servidor.
+                  <strong>Atención:</strong> Falta configurar la variable <code>NEXT_PUBLIC_PAYPHONE_TOKEN</code> en el archivo <code>.env</code>.
                 </div>
               )}
 

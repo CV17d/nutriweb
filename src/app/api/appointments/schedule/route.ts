@@ -4,6 +4,8 @@ import { withErrorHandler } from '../../../../lib/api-handler';
 import { getActiveSubscription } from '../../../../services/subscriptions';
 import { createAppointment } from '../../../../services/appointments';
 import { logger } from '../../../../lib/logger';
+import { requireAdminSession } from '../../../../lib/auth';
+import { query } from '../../../../lib/db';
 
 const scheduleSchema = z.object({
   clientId: z.string().uuid(),
@@ -22,7 +24,41 @@ async function postHandler(request: Request) {
 
   const { clientId, clientName, clientEmail, date } = parsed.data;
 
-  // 1. Verificar que tenga una suscripción activa
+  // 1. Verificar si la petición proviene de un administrador autenticado
+  const adminSession = await requireAdminSession();
+
+  // 2. Mitigación de IDOR: verificar existencia y propiedad del recurso
+  const userCheck = await query(
+    'SELECT id, email, full_name FROM users WHERE id = $1',
+    [clientId]
+  );
+
+  if (userCheck.rows.length === 0) {
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Cliente no encontrado' 
+    }, { status: 404 });
+  }
+
+  const existingUser = userCheck.rows[0];
+
+  // Si no es admin, validar correspondencia estricta de email para prevenir suplantación/IDOR
+  if (!adminSession) {
+    if (existingUser.email.toLowerCase() !== clientEmail.toLowerCase().trim()) {
+      logger.warn({
+        message: 'Intento de acceso no autorizado (posible IDOR) detectado en agendamiento',
+        requestedClientId: clientId,
+        requestedEmail: clientEmail,
+        actualEmail: existingUser.email
+      });
+      return NextResponse.json({
+        success: false,
+        message: 'No tienes autorización para agendar citas en nombre de este usuario.'
+      }, { status: 403 });
+    }
+  }
+
+  // 3. Verificar que tenga una suscripción activa
   const activeSub = await getActiveSubscription(clientId);
   
   if (!activeSub) {
@@ -32,7 +68,7 @@ async function postHandler(request: Request) {
     }, { status: 403 });
   }
 
-  // 2. Agendar la cita (esto descontará la sesión automáticamente gracias al servicio)
+  // 4. Agendar la cita (esto descontará la sesión automáticamente gracias al servicio)
   const result = await createAppointment({
     clientId,
     clientName,

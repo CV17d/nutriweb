@@ -21,7 +21,6 @@ export default function PatientsPage() {
   // Selección y borrado
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [adminPassword, setAdminPassword] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchPatients = async () => {
@@ -84,21 +83,20 @@ export default function PatientsPage() {
 
   const handleDelete = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!adminPassword) return;
+    if (selectedIds.length === 0) return;
     
     setIsDeleting(true);
     try {
       const res = await fetch('/api/admin/patients', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscriptionIds: selectedIds, password: adminPassword })
+        body: JSON.stringify({ subscriptionIds: selectedIds })
       });
       
       if (res.ok) {
         alert('Pacientes eliminados correctamente');
         setSelectedIds([]);
         setIsModalOpen(false);
-        setAdminPassword('');
         fetchPatients();
       } else {
         const data = await res.json();
@@ -203,25 +201,11 @@ export default function PatientsPage() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
             <h2 className="text-2xl font-bold text-red-600 mb-2">Confirmar Eliminación</h2>
             <p className="text-gray-600 mb-6">
-              Estás a punto de eliminar definitivamente <strong>{selectedIds.length}</strong> paciente(s). 
-              Esta acción no se puede deshacer. Ingresa tu contraseña maestra para confirmar.
+              Estás a punto de eliminar definitivamente <strong>{selectedIds.length}</strong> paciente(s) y sus citas asociadas. 
+              Esta acción no se puede deshacer.
             </p>
             
             <form onSubmit={handleDelete}>
-              <div className="mb-6">
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Contraseña de Administrador
-                </label>
-                <input 
-                  type="password" 
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                  placeholder="Escribe tu contraseña"
-                  required
-                />
-              </div>
-              
               <div className="flex gap-3 justify-end">
                 <button 
                   type="button"
@@ -232,7 +216,7 @@ export default function PatientsPage() {
                 </button>
                 <button 
                   type="submit"
-                  disabled={isDeleting || !adminPassword}
+                  disabled={isDeleting}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-bold disabled:opacity-50"
                 >
                   {isDeleting ? 'Borrando...' : 'Confirmar Borrado'}

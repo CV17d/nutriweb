@@ -54,3 +54,15 @@ export async function getSession() {
   if (!session) return null;
   return await verifySession(session);
 }
+
+/**
+ * Validador estricto para Defense in Depth en rutas y layouts administrativos
+ */
+export async function requireAdminSession() {
+  const session = await getSession();
+  if (!session || session.role !== 'admin') {
+    return null;
+  }
+  return session;
+}
+

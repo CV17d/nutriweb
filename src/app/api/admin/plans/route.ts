@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { query } from '../../../../lib/db';
+import { requireAdminSession } from '../../../../lib/auth';
 
 export async function GET() {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const result = await query('SELECT * FROM plans ORDER BY price ASC');
     return NextResponse.json(result.rows);
@@ -13,6 +19,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const data = await request.json();
     const { name, price, duration_months, description, total_sessions, is_active, is_recommended, features } = data;
@@ -32,6 +43,11 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const data = await request.json();
     const { id, name, price, duration_months, description, total_sessions, is_active, is_recommended, features } = data;
@@ -62,6 +78,11 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');

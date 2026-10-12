@@ -5,6 +5,7 @@ import { createTransaction } from '../../../services/transactions';
 import { query } from '../../../lib/db';
 import { logger } from '../../../lib/logger';
 import crypto from 'crypto';
+import { checkRateLimit, getClientIp } from '../../../lib/rate-limit';
 
 const checkoutSchema = z.object({
   planId: z.number(),
@@ -18,6 +19,15 @@ const checkoutSchema = z.object({
 });
 
 async function postHandler(request: Request) {
+  const ip = getClientIp(request);
+  const rateLimit = await checkRateLimit(`checkout:${ip}`, 10, 10 * 60);
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { success: false, message: 'Demasiadas solicitudes de compra iniciadas. Por favor, espera unos minutos.' },
+      { status: 429 }
+    );
+  }
+
   const body = await request.json();
   const parsed = checkoutSchema.safeParse(body);
 

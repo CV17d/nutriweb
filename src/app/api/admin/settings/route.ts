@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { query } from '../../../../lib/db';
+import { requireAdminSession } from '../../../../lib/auth';
 
 export async function GET() {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const result = await query('SELECT key, value FROM web_settings');
     const settings = result.rows.reduce((acc, row) => {
@@ -18,6 +24,11 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { key, value } = await request.json();
     

@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { query } from '../../../../lib/db';
+import { requireAdminSession } from '../../../../lib/auth';
 
 export async function GET() {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const result = await query('SELECT * FROM success_cases WHERE is_active = true ORDER BY created_at DESC');
+    const result = await query('SELECT * FROM success_cases ORDER BY created_at DESC');
     return NextResponse.json(result.rows);
   } catch (error) {
     console.error('Error fetching success cases:', error);
@@ -13,6 +19,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { patient_name, comment, metrics, image_url, rating } = await request.json();
     
@@ -34,6 +45,11 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { id, patient_name, comment, metrics, image_url, rating } = await request.json();
     
@@ -55,6 +71,11 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');

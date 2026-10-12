@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { sendSubscriptionLinkEmail } from '../../../../services/email';
 import { query } from '../../../../lib/db';
+import { requireAdminSession } from '../../../../lib/auth';
 
 export async function POST(request: Request) {
+  const session = await requireAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { user_id, subscription_id } = await request.json();
     
@@ -10,7 +16,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
-    const userResult = await query('SELECT u.full_name as name, u.email, p.name as plan_name, cs.sessions_used, cs.total_sessions FROM users u JOIN client_subscriptions cs ON u.id = cs.client_id JOIN plans p ON cs.plan_id = p.id WHERE u.id = $1 AND cs.id = $2', [user_id, subscription_id]);
+    const userResult = await query(
+      'SELECT u.full_name as name, u.email, p.name as plan_name, cs.sessions_used, cs.total_sessions FROM users u JOIN client_subscriptions cs ON u.id = cs.client_id JOIN plans p ON cs.plan_id = p.id WHERE u.id = $1 AND cs.id = $2',
+      [user_id, subscription_id]
+    );
     const user = userResult.rows[0];
     
     if (!user) {
