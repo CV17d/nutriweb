@@ -208,12 +208,10 @@ export default function FreeAppointmentForm() {
     if (!selectedDate || !selectedTime) return "#";
     
     const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-    const d = String(selectedDate).padStart(2, '0');
     const [hours, minutes] = selectedTime.split(':');
     
     const dateObj = new Date(year, currentDate.getMonth(), selectedDate, parseInt(hours), parseInt(minutes));
-    const endDateObj = new Date(dateObj.getTime() + 60 * 60 * 1000);
+    const endDateObj = new Date(dateObj.getTime() + 120 * 60 * 1000); // 2 horas
 
     const formatGCalDate = (date: Date) => {
       return date.toISOString().replace(/-|:|\.\d\d\d/g,"");
@@ -222,9 +220,17 @@ export default function FreeAppointmentForm() {
     const startStr = formatGCalDate(dateObj);
     const endStr = formatGCalDate(endDateObj);
     
+    const isPresencial = appointmentType === "Presencial";
+    const meetLink = process.env.NEXT_PUBLIC_MEET_LINK || "https://meet.google.com/iny-ztwg-zne";
+    const clinicLink = process.env.NEXT_PUBLIC_CLINIC_LOCATION_LINK || "https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic";
+
     const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
-    const details = encodeURIComponent(`Cita nutricional (${appointmentType}).`);
-    const location = encodeURIComponent(appointmentType === "Presencial" ? "Centro de Alto Rendimiento AB, Quito" : "Enlace Virtual (te enviaremos el link)");
+    const details = encodeURIComponent(
+      isPresencial
+        ? `Cita nutricional (Presencial).\nUbicación: ${clinicLink}`
+        : `Cita nutricional (Virtual).${meetLink ? `\nEnlace de reunión: ${meetLink}` : ''}`
+    );
+    const location = encodeURIComponent(isPresencial ? clinicLink : meetLink);
 
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
   };

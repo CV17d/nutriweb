@@ -53,13 +53,18 @@ export default function PatientsPage() {
         body: JSON.stringify({ user_id: userId, subscription_id: subscriptionId }),
       });
       
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
-        alert('Enlace enviado correctamente');
+        alert(data.message || '✅ Enlace enviado correctamente al correo del paciente');
+      } else if (res.status === 401) {
+        alert('⚠️ Tu sesión de administrador ha caducado por inactividad. Por favor, vuelve a iniciar sesión.');
+        window.location.href = '/admin/login?reason=expired';
       } else {
-        alert('Error al enviar el enlace');
+        alert(`❌ ${data.message || data.error || 'Error al enviar el enlace. Intenta de nuevo.'}`);
       }
-    } catch (error) {
-      alert('Error de conexión');
+    } catch (error: any) {
+      alert(`❌ Error de conexión: ${error.message || 'No se pudo conectar con el servidor. Revisa tu acceso a internet.'}`);
     } finally {
       setSendingLink(null);
     }

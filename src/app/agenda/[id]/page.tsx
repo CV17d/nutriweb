@@ -21,20 +21,26 @@ interface SubscriptionInfo {
 export default function AgendaPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const router = useRouter();
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<SubscriptionInfo | null>(null);
-  const [allowedRange, setAllowedRange] = useState<{start: Date, end: Date} | null>(null);
-  
+  const [allowedRange, setAllowedRange] = useState<{ start: Date, end: Date } | null>(null);
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedTime, setSelectedTime] = useState('');
   const [appointmentType, setAppointmentType] = useState('Virtual');
-  
+
   const [booking, setBooking] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [bookingResult, setBookingResult] = useState<{
+    gcalUrl?: string;
+    meetLink?: string | null;
+    clinicLink?: string | null;
+    appointmentType?: string;
+  } | null>(null);
 
   useEffect(() => {
     fetch(`/api/agenda/${unwrappedParams.id}/info`)
@@ -78,7 +84,7 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
 
   const handleBook = async () => {
     if (!selectedDate || !selectedTime) return;
-    
+
     setBooking(true);
     try {
       const [hour, minute] = selectedTime.split(':');
@@ -96,6 +102,12 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
 
       const data = await res.json();
       if (data.success) {
+        setBookingResult({
+          gcalUrl: data.gcalUrl,
+          meetLink: data.meetLink,
+          clinicLink: data.clinicLink,
+          appointmentType: data.appointmentType || appointmentType,
+        });
         setSuccess(true);
       } else {
         alert(data.message || 'Error al agendar la cita');
@@ -128,13 +140,47 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
   }
 
   if (success) {
+    const isPresencial = bookingResult?.appointmentType === 'Presencial';
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-brand-light-gray px-4">
         <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full border border-green-100">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500 text-3xl">✅</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Cita Agendada!</h2>
           <p className="text-gray-600 mb-6">Tu sesión ha sido programada con éxito. Hemos enviado la confirmación a tu correo.</p>
-          <button onClick={() => router.push('/')} className="w-full bg-brand-electric text-white py-3 rounded-full font-bold">Volver al Inicio</button>
+
+          {!isPresencial && bookingResult?.meetLink && (
+            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6 text-left">
+              <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Enlace de tu videollamada</p>
+              <a href={bookingResult.meetLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-brand-electric hover:underline break-all">
+                {bookingResult.meetLink}
+              </a>
+            </div>
+          )}
+
+          {isPresencial && (
+            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6 text-left">
+              <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Ubicación del consultorio</p>
+              <a href={bookingResult?.clinicLink || "https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic"} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-brand-electric hover:underline break-all">
+                Centro de Alto Rendimiento AB, Quito (Ver en Maps)
+              </a>
+            </div>
+          )}
+
+          {bookingResult?.gcalUrl && (
+            <a
+              href={bookingResult.gcalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-brand-electric hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-full transition-opacity flex items-center justify-center gap-2 shadow-md mb-4"
+            >
+              🗓️ Agregar a Google Calendar
+            </a>
+          )}
+
+          <button onClick={() => router.push('/')} className="w-full bg-transparent border-2 border-gray-200 hover:bg-gray-50 text-brand-navy py-3 rounded-full font-bold">
+            Volver al Inicio
+          </button>
         </div>
       </div>
     );
@@ -143,7 +189,7 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
   return (
     <div className="min-h-screen bg-brand-light-gray py-12 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-        
+
         <div className="bg-brand-navy p-8 text-white text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-electric/20 rounded-full -mr-10 -mt-10 blur-2xl"></div>
           <h1 className="text-3xl font-extrabold mb-2 relative z-10">Tu Agenda Privada</h1>
@@ -168,10 +214,10 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
                 <span>1. Elige una Fecha</span>
               </h3>
               <p className="text-xs text-gray-500 mb-3">
-                Basado en tu progreso, puedes agendar en el siguiente rango habilitado: 
+                Basado en tu progreso, puedes agendar en el siguiente rango habilitado:
                 <strong> {format(allowedRange.start, 'dd/MM/yyyy')} - {format(allowedRange.end, 'dd/MM/yyyy')}</strong>
               </p>
-              
+
               <div className="border border-gray-200 rounded-xl overflow-hidden p-2 bg-white flex justify-center custom-datepicker">
                 <DatePicker
                   selected={selectedDate}
@@ -207,7 +253,7 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Horarios Disponibles</label>
-                
+
                 {!selectedDate ? (
                   <div className="text-center p-6 border-2 border-dashed border-gray-200 rounded-xl text-gray-400">
                     <p className="text-sm">Selecciona una fecha primero</p>
@@ -226,11 +272,10 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
                       <button
                         key={time}
                         onClick={() => setSelectedTime(time)}
-                        className={`py-2 rounded-lg text-sm font-medium transition-all ${
-                          selectedTime === time 
-                            ? 'bg-brand-navy text-white shadow-md' 
+                        className={`py-2 rounded-lg text-sm font-medium transition-all ${selectedTime === time
+                            ? 'bg-brand-navy text-white shadow-md'
                             : 'bg-white border border-gray-200 text-gray-700 hover:border-brand-navy hover:text-brand-navy'
-                        }`}
+                          }`}
                       >
                         {time}
                       </button>
@@ -250,11 +295,12 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
               {booking ? 'Confirmando Cita...' : 'Confirmar Cita'}
             </button>
           </div>
-          
+
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .custom-datepicker .react-datepicker {
           border: none;
           font-family: inherit;

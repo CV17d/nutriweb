@@ -38,12 +38,22 @@ export async function createAppointmentEvent(
       ? `Consulta Gratuita (${appointmentType}) - ${clientName}` 
       : `Cita de Plan ${planName || 'Nutricional'} (${appointmentType}) - ${clientName}`;
 
-    const eventDescription = `Cita agendada a través de la plataforma web.\nModalidad: ${appointmentType}\nCliente: ${clientName}\nEmail: ${clientEmail}${clientPhone ? `\nTeléfono: ${clientPhone}` : ''}${planName ? `\nPlan: ${planName}` : ''}`;
+    const isPresencial = appointmentType === 'Presencial';
+    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+    const meetLink = process.env.MEET_LINK || '';
+
+    let eventDescription = `Cita agendada a través de la plataforma web.\nModalidad: ${appointmentType}\nCliente: ${clientName}\nEmail: ${clientEmail}${clientPhone ? `\nTeléfono: ${clientPhone}` : ''}${planName ? `\nPlan: ${planName}` : ''}`;
+    
+    if (isPresencial) {
+      eventDescription += `\nUbicación: ${clinicLink}`;
+    } else if (meetLink) {
+      eventDescription += `\nEnlace de videollamada: ${meetLink}`;
+    }
 
     const event: any = {
       summary: eventSummary,
       description: eventDescription,
-      location: appointmentType === 'Presencial' ? (process.env.CLINIC_LOCATION_LINK || 'Consultorio Médico') : (process.env.MEET_LINK || 'Enlace de videollamada enviado al paciente'),
+      location: isPresencial ? clinicLink : (meetLink || 'Enlace de videollamada enviado al paciente'),
       start: {
         dateTime: date.toISOString(),
       },

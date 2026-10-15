@@ -20,7 +20,7 @@ async function bookHandler(request: Request, { params }: { params: Promise<{ id:
 
   const body = await request.json();
   const parsed = bookSchema.safeParse(body);
-  
+
   if (!parsed.success) {
     return NextResponse.json({ success: false, message: 'Datos inválidos', errors: parsed.error.format() }, { status: 400 });
   }
@@ -43,19 +43,31 @@ async function bookHandler(request: Request, { params }: { params: Promise<{ id:
   });
 
   const meetLink = process.env.MEET_LINK || '';
-  
-  await sendFinalConfirmationEmail(
-    subscription.client_email,
-    subscription.client_name,
-    new Date(date),
-    appointmentType,
-    meetLink
+  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+  const isPresencial = appointmentType === 'Presencial';
+
+  const endTime = new Date(new Date(date).getTime() + 120 * 60000); // 2 horas
+  const formatGCalDate = (d: Date) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+  const startStr = formatGCalDate(new Date(date));
+  const endStr = formatGCalDate(endTime);
+
+  const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
+  const details = encodeURIComponent(
+    isPresencial
+      ? `Cita nutricional (Presencial).\nUbicación: ${clinicLink}`
+      : `Cita nutricional (Virtual).${meetLink ? `\nEnlace de reunión: ${meetLink}` : ''}`
   );
+  const location = encodeURIComponent(isPresencial ? clinicLink : meetLink);
+  const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
 
   return NextResponse.json({
     success: true,
     message: 'Cita agendada con éxito',
     appointmentId: result.appointmentId,
+    gcalUrl,
+    meetLink: isPresencial ? null : meetLink,
+    clinicLink: isPresencial ? clinicLink : null,
+    appointmentType,
   });
 }
 

@@ -3,14 +3,18 @@ import Link from 'next/link';
 export default async function CheckoutSuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string; appointmentType?: string; [key: string]: string | string[] | undefined }>;
+  searchParams: Promise<{ date?: string; appointmentType?: string;[key: string]: string | string[] | undefined }>;
 }) {
   const { date, appointmentType } = await searchParams;
   let calendarUrl = "#";
 
+  const isPresencial = appointmentType === 'Presencial';
+  const meetLink = process.env.MEET_LINK || '';
+  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+
   if (date && typeof date === 'string') {
     const dateObj = new Date(date);
-    const endDateObj = new Date(dateObj.getTime() + 60 * 60 * 1000); // +1 hour
+    const endDateObj = new Date(dateObj.getTime() + 120 * 60 * 1000); // 2 horas (120 min)
 
     const formatGCalDate = (d: Date) => {
       return d.toISOString().replace(/-|:|\.\d\d\d/g, "");
@@ -18,10 +22,14 @@ export default async function CheckoutSuccessPage({
 
     const startStr = formatGCalDate(dateObj);
     const endStr = formatGCalDate(endDateObj);
-    
+
     const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
-    const details = encodeURIComponent(`Cita nutricional (${appointmentType || "Virtual"}).`);
-    const location = encodeURIComponent(appointmentType === "Presencial" ? "Centro de Alto Rendimiento AB, Quito" : "Enlace Virtual (te enviaremos el link)");
+    const details = encodeURIComponent(
+      isPresencial
+        ? `Cita nutricional (Presencial).\nUbicación: ${clinicLink}`
+        : `Cita nutricional (Virtual).${meetLink ? `\nEnlace de reunión: ${meetLink}` : ''}`
+    );
+    const location = encodeURIComponent(isPresencial ? clinicLink : meetLink);
 
     calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
   }
@@ -33,18 +41,36 @@ export default async function CheckoutSuccessPage({
 
         <div className="w-24 h-24 bg-blue-50 text-brand-electric rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
           <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        
+
         <h1 className="text-4xl font-extrabold text-brand-navy mb-4 tracking-tight">¡Pago Exitoso!</h1>
-        <p className="text-gray-500 text-lg mb-10 leading-relaxed">
+        <p className="text-gray-500 text-lg mb-6 leading-relaxed">
           Tu plan ha sido activado y tu primera consulta ha sido agendada. Hemos enviado los detalles a tu correo y bloqueado el espacio en nuestro calendario.
         </p>
 
+        {!isPresencial && meetLink && (
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6 text-left">
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Enlace de tu videollamada</p>
+            <a href={meetLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-brand-electric hover:underline break-all">
+              {meetLink}
+            </a>
+          </div>
+        )}
+
+        {isPresencial && (
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6 text-left">
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Ubicación de tu consulta presencial</p>
+            <a href={clinicLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-brand-electric hover:underline break-all">
+              Centro de Alto Rendimiento AB, Quito (Ver en Maps)
+            </a>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4">
           {date && typeof date === 'string' && (
-            <a 
+            <a
               href={calendarUrl}
               target="_blank"
               rel="noopener noreferrer"

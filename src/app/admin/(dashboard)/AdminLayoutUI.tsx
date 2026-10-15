@@ -10,10 +10,10 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // Monitor de inactividad de 30 minutos e interceptor de 401 en el cliente
+  // Monitor de inactividad de 2 horas e interceptor de 401 en el cliente
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    const INACTIVITY_LIMIT_MS = 30 * 60 * 1000; // 30 minutos
+    const INACTIVITY_LIMIT_MS = 2 * 60 * 60 * 1000; // 2 horas (consistente con el backend)
 
     const resetTimer = () => {
       clearTimeout(timeoutId);

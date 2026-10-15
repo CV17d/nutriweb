@@ -1,11 +1,14 @@
 import Link from 'next/link';
 
 export default async function VerifySuccessPage(props: {
-  searchParams: Promise<{ status?: string; error?: string; gcalUrl?: string }>;
+  searchParams: Promise<{ status?: string; error?: string; gcalUrl?: string; type?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const isSuccess = searchParams.status === 'success';
   const errorType = searchParams.error;
+  const isPresencial = searchParams.type === 'Presencial';
+  const meetLink = process.env.MEET_LINK || '';
+  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
@@ -20,14 +23,46 @@ export default async function VerifySuccessPage(props: {
               </svg>
             </div>
             <h1 className="text-3xl font-extrabold text-gray-900 mb-4 tracking-tight">¡Cita Confirmada!</h1>
-            <div className="bg-blue-50 border-l-4 border-[#0052FF] p-4 mb-8 text-left rounded-r-lg">
-              <p className="text-blue-900 font-medium">
-                ⚠️ Paso final obligatorio:
-              </p>
-              <p className="text-blue-800 text-sm mt-1">
-                Para obtener el enlace de Google Meet para tu videollamada, <strong>debes agregar el recordatorio a tu calendario</strong> haciendo clic en el botón de abajo.
-              </p>
-            </div>
+            
+            {!isPresencial ? (
+              <>
+                <div className="bg-blue-50 border-l-4 border-[#0052FF] p-4 mb-6 text-left rounded-r-lg">
+                  <p className="text-blue-900 font-medium">
+                    🗓️ Modalidad Virtual:
+                  </p>
+                  <p className="text-blue-800 text-sm mt-1">
+                    Para tener a mano el enlace de Google Meet y recibir recordatorios automáticos, <strong>agrega el evento a tu calendario</strong>.
+                  </p>
+                </div>
+
+                {meetLink && (
+                  <div className="bg-slate-50 border border-gray-200 rounded-2xl p-4 mb-6 text-left">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Enlace de la Videollamada (Google Meet):</p>
+                    <a href={meetLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#0052FF] hover:underline break-all">
+                      {meetLink}
+                    </a>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="bg-blue-50 border-l-4 border-[#0052FF] p-4 mb-6 text-left rounded-r-lg">
+                  <p className="text-blue-900 font-medium">
+                    🏢 Modalidad Presencial:
+                  </p>
+                  <p className="text-blue-800 text-sm mt-1">
+                    Para tener a mano la fecha, hora y ubicación en tu celular, <strong>agrega el evento a tu calendario</strong>.
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 border border-gray-200 rounded-2xl p-4 mb-6 text-left">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ubicación del Consultorio:</p>
+                  <a href={clinicLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#0052FF] hover:underline break-all">
+                    Centro de Alto Rendimiento AB, Quito (Ver en Google Maps)
+                  </a>
+                </div>
+              </>
+            )}
 
             {searchParams.gcalUrl && (
               <a

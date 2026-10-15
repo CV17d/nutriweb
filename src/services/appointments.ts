@@ -69,17 +69,15 @@ export async function createAppointment(params: CreateAppointmentParams) {
 
       const eventResult = await createAppointmentEvent(clientEmail, clientName, date, false, finalPlanName, appointmentType, clientPhone);
 
-      // Enviar correo de confirmación final con el enlace de Meet estático
+      // Enviar correo de confirmación final
       const meetLink = process.env.MEET_LINK || '';
-      if (meetLink) {
-        await sendFinalConfirmationEmail(
-          clientEmail,
-          clientName,
-          date,
-          appointmentType,
-          meetLink
-        );
-      }
+      await sendFinalConfirmationEmail(
+        clientEmail,
+        clientName,
+        date,
+        appointmentType,
+        meetLink
+      );
     } catch (error) {
       // Si Google Calendar falla, no eliminamos la cita de la BD (Eventual consistency / Dead letter)
       logger.error({ message: 'Fallo al crear evento en GCal o enviar correo de confirmación. La cita sí está en BD.', appointmentId }, error);

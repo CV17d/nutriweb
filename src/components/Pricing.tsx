@@ -7,14 +7,14 @@ function PricingCard({ plan }: { plan: any }) {
   const [expanded, setExpanded] = useState(false);
   const features = plan.features || [];
   
-  // Si es un plan destacado (Performance)
+  // Si es un plan destacado
   const isRecommended = plan.is_recommended;
   const isElite = plan.name === 'Elite';
   
   return (
-    <div className={`rounded-3xl p-8 flex flex-col transition-all duration-300 relative 
+    <div className={`rounded-3xl p-5 xl:p-7 flex flex-col transition-all duration-300 relative h-full
       ${isRecommended 
-        ? 'bg-brand-navy shadow-2xl lg:scale-105 z-10 border border-brand-navy/50 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] hover:lg:scale-[1.08]' 
+        ? 'bg-brand-navy shadow-2xl lg:scale-[1.03] z-10 border border-brand-navy/50 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]' 
         : 'bg-brand-white border border-gray-100 shadow-sm hover:-translate-y-2 hover:shadow-xl'
       }`}>
       
@@ -24,26 +24,26 @@ function PricingCard({ plan }: { plan: any }) {
         </div>
       )}
 
-      <div className="flex-grow">
+      <div className="flex-grow flex flex-col">
         <h3 className={`text-xl font-bold mb-2 ${isRecommended ? 'text-brand-white' : 'text-brand-navy'}`}>
           {plan.name}
         </h3>
-        <div className="flex items-end gap-1 mb-4">
-          <span className={`text-5xl font-black ${isRecommended ? 'text-brand-white' : 'text-brand-navy'}`}>
+        <div className="flex items-end gap-1 mb-4 flex-wrap">
+          <span className={`text-3xl xl:text-4xl font-black ${isRecommended ? 'text-brand-white' : 'text-brand-navy'}`}>
             ${plan.price}
           </span>
-          <span className={`text-sm font-semibold mb-2 ${isRecommended ? 'text-gray-400' : 'text-brand-navy/60'}`}>
+          <span className={`text-xs xl:text-sm font-semibold mb-1.5 ${isRecommended ? 'text-gray-400' : 'text-brand-navy/60'}`}>
             / {plan.duration_months} mes{plan.duration_months > 1 ? 'es' : ''}
           </span>
         </div>
-        <p className={`text-sm mb-4 min-h-[60px] ${isRecommended ? 'text-gray-300' : 'text-brand-navy/70'}`} dangerouslySetInnerHTML={{ __html: plan.description }} />
+        <p className={`text-xs xl:text-sm mb-4 min-h-[50px] leading-relaxed ${isRecommended ? 'text-gray-300' : 'text-brand-navy/70'}`} dangerouslySetInnerHTML={{ __html: plan.description }} />
         
-        <ul className="flex flex-col mb-2">
+        <ul className="flex flex-col mb-4 space-y-2">
           {features.map((item: string, i: number) => (
             <li 
               key={i} 
               className={`flex items-start gap-2 overflow-hidden transition-all duration-300 ease-in-out
-                ${!expanded && i >= 4 ? 'max-h-0 opacity-0 m-0' : 'max-h-20 opacity-100 mb-3'}
+                ${!expanded && i >= 4 ? 'max-h-0 opacity-0 m-0' : 'max-h-20 opacity-100'}
               `}
             >
               <svg className="w-4 h-4 text-brand-electric shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,8 +59,8 @@ function PricingCard({ plan }: { plan: any }) {
         {features.length > 4 && (
           <button 
             onClick={() => setExpanded(!expanded)}
-            className={`text-xs font-bold transition-colors mb-6 flex items-center gap-1
-              ${isRecommended ? 'text-brand-electric hover:text-white' : (isElite ? 'text-brand-electric hover:text-brand-navy' : 'text-brand-electric hover:text-brand-navy')}
+            className={`text-xs font-bold transition-colors mb-6 flex items-center gap-1 mt-auto
+              ${isRecommended ? 'text-brand-electric hover:text-white' : 'text-brand-electric hover:text-brand-navy'}
             `}
           >
             {expanded ? 'Ver menos' : `Ver ${features.length - 4} más...`}
@@ -71,7 +71,7 @@ function PricingCard({ plan }: { plan: any }) {
       
       <Link 
         href={`/checkout/${plan.id}`} 
-        className={`w-full inline-block text-center rounded-full py-3.5 font-bold text-xs uppercase tracking-wider transition-colors mt-auto
+        className={`w-full inline-block text-center rounded-full py-3.5 font-bold text-xs uppercase tracking-wider transition-colors mt-auto shadow-sm
           ${isRecommended 
             ? 'bg-brand-electric text-brand-white shadow-lg hover:opacity-90' 
             : (isElite 
@@ -93,8 +93,16 @@ export default function Pricing({ plans = [] }: { plans?: any[] }) {
     return null;
   }
 
+  // Clases estáticas para que Tailwind CSS compile correctamente las columnas
+  const getGridColsClass = () => {
+    if (plans.length === 1) return 'grid-cols-1 max-w-md mx-auto';
+    if (plans.length === 2) return 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto';
+    if (plans.length === 3) return 'grid-cols-1 md:grid-cols-3 max-w-6xl mx-auto';
+    return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
+  };
+
   return (
-    <section id="planes" className="w-full max-w-7xl mx-auto px-6 py-12 md:py-24">
+    <section id="planes" className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
       {/* Encabezado */}
       <div className="flex flex-col items-center text-center mb-16">
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-navy mb-4 tracking-tight">
@@ -105,8 +113,8 @@ export default function Pricing({ plans = [] }: { plans?: any[] }) {
         </p>
       </div>
 
-      {/* Grid de Precios */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${Math.min(plans.length, 4)} gap-8 lg:gap-6 items-start`}>
+      {/* Grid de Precios en una sola fila para desktop */}
+      <div className={`grid ${getGridColsClass()} gap-6 lg:gap-4 xl:gap-6 items-stretch`}>
         {plans.map((plan) => (
           <PricingCard key={plan.id} plan={plan} />
         ))}

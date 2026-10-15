@@ -100,14 +100,15 @@ export async function sendFinalConfirmationEmail(
     const startStr = formatGCalDate(appointmentDate);
     const endStr = formatGCalDate(endTime);
     
-    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'Consultorio Médico';
+    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+    const isPresencial = appointmentType === 'Presencial';
     
     const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
-    const detailsText = appointmentType === 'Presencial' 
+    const detailsText = isPresencial 
       ? `Cita nutricional (Presencial).\nUbicación: ${clinicLink}` 
-      : `Cita nutricional (Virtual).\nEnlace de reunión: ${meetLink}`;
+      : `Cita nutricional (Virtual).${meetLink ? `\nEnlace de reunión: ${meetLink}` : ''}`;
     const details = encodeURIComponent(detailsText);
-    const location = encodeURIComponent(appointmentType === 'Presencial' ? clinicLink : meetLink);
+    const location = encodeURIComponent(isPresencial ? clinicLink : meetLink);
     
     const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
 
@@ -170,10 +171,11 @@ export async function sendSubscriptionLinkEmail(
   subscriptionId: string,
   planName: string,
   sessionsUsed: number = 1,
-  totalSessions: number = 1
+  totalSessions: number = 1,
+  customBaseUrl?: string
 ) {
   try {
-    const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const appUrl = customBaseUrl || process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const agendaUrl = `${appUrl}/agenda/${subscriptionId}`;
     
     const message = sessionsUsed <= 1 
@@ -225,7 +227,7 @@ export async function sendReminderEmail(
 ) {
   try {
     const timeText = is2Hours ? "2 HORAS" : "48 HORAS";
-    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'Consultorio Médico';
+    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
     const meetLink = process.env.MEET_LINK || '';
     
     const dateStr = appointmentDate.toLocaleString('es-ES', {

@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 export const COOKIE_NAME = 'admin_session';
 
 // Tiempos de caducidad en milisegundos
-export const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutos de inactividad máxima
+export const INACTIVITY_TIMEOUT_MS = 2 * 60 * 60 * 1000; // 2 horas de inactividad máxima (permite desplazarse sin cierre repentino)
 export const ABSOLUTE_TIMEOUT_MS = 8 * 60 * 60 * 1000; // 8 horas de duración máxima absoluta
 
 function getEncodedJwtSecret(): Uint8Array {

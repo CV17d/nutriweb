@@ -16,6 +16,9 @@ async function verifyHandler(request: Request) {
     
     // Generar el enlace de Google Calendar
     const meetLink = process.env.MEET_LINK || '';
+    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+    const isPresencial = appointment.type === 'Presencial';
+
     const endTime = new Date(appointment.date.getTime() + 120 * 60000); // 2 horas
     const formatGCalDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
     
@@ -23,13 +26,17 @@ async function verifyHandler(request: Request) {
     const endStr = formatGCalDate(endTime);
     
     const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
-    const details = encodeURIComponent(`Cita nutricional (${appointment.type}).\nEnlace de reunión: ${meetLink}`);
-    const location = encodeURIComponent(appointment.type === 'Presencial' ? 'Consultorio Médico' : meetLink);
+    const details = encodeURIComponent(
+      isPresencial
+        ? `Cita nutricional (Presencial).\nUbicación: ${clinicLink}`
+        : `Cita nutricional (Virtual).${meetLink ? `\nEnlace de reunión: ${meetLink}` : ''}`
+    );
+    const location = encodeURIComponent(isPresencial ? clinicLink : meetLink);
     
     const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
 
-    // Redirigir a la página de éxito pasando el enlace
-    return NextResponse.redirect(new URL(`/verify-success?status=success&gcalUrl=${encodeURIComponent(gcalUrl)}`, request.url));
+    // Redirigir a la página de éxito pasando el enlace y modalidad
+    return NextResponse.redirect(new URL(`/verify-success?status=success&gcalUrl=${encodeURIComponent(gcalUrl)}&type=${encodeURIComponent(appointment.type || 'Virtual')}`, request.url));
   } catch (error) {
     logger.error('Error al verificar la cita:', error);
     return NextResponse.redirect(new URL('/verify-success?error=invalid_token', request.url));

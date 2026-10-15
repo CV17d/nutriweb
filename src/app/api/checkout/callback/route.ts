@@ -53,13 +53,22 @@ async function processPaymentConfirmation({
       return NextResponse.redirect(new URL('/checkout/error?reason=not_found', request.url));
     }
 
+    const getMetadata = (t: any) => {
+      if (!t?.metadata) return null;
+      return typeof t.metadata === 'string' ? JSON.parse(t.metadata) : t.metadata;
+    };
+
     // 1. IDEMPOTENCIA: Si ya fue procesada y marcada como éxito, retornar éxito de inmediato sin duplicar
     if (transaction.status === 'success') {
       logger.info({ message: 'Transacción ya procesada previamente (idempotente)', clientTransactionId });
       if (isPostRequest) {
         return NextResponse.json({ success: true, message: 'Transacción ya procesada previamente' });
       }
-      return NextResponse.redirect(new URL('/checkout/success', request.url));
+      const meta = getMetadata(transaction);
+      const successUrl = new URL('/checkout/success', request.url);
+      if (meta?.firstAppointmentDate) successUrl.searchParams.set('date', meta.firstAppointmentDate);
+      if (meta?.appointmentType) successUrl.searchParams.set('appointmentType', meta.appointmentType);
+      return NextResponse.redirect(successUrl);
     }
 
     // 2. BLOQUEO ATÓMICO: Reclamar la transacción para procesamiento exclusivo
@@ -71,14 +80,22 @@ async function processPaymentConfirmation({
         if (isPostRequest) {
           return NextResponse.json({ success: true, message: 'Transacción completada concurrentemente' });
         }
-        return NextResponse.redirect(new URL('/checkout/success', request.url));
+        const meta = getMetadata(refreshed);
+        const successUrl = new URL('/checkout/success', request.url);
+        if (meta?.firstAppointmentDate) successUrl.searchParams.set('date', meta.firstAppointmentDate);
+        if (meta?.appointmentType) successUrl.searchParams.set('appointmentType', meta.appointmentType);
+        return NextResponse.redirect(successUrl);
       }
       // Si está en 'processing' por otra petición simultánea, esperar brevemente
       logger.warn({ message: 'Transacción en procesamiento concurrente detectada', clientTransactionId });
       if (isPostRequest) {
         return NextResponse.json({ success: true, message: 'Transacción en procesamiento' }, { status: 202 });
       }
-      return NextResponse.redirect(new URL('/checkout/success', request.url));
+      const meta = getMetadata(transaction);
+      const successUrl = new URL('/checkout/success', request.url);
+      if (meta?.firstAppointmentDate) successUrl.searchParams.set('date', meta.firstAppointmentDate);
+      if (meta?.appointmentType) successUrl.searchParams.set('appointmentType', meta.appointmentType);
+      return NextResponse.redirect(successUrl);
     }
 
     // 3. Confirmar estado real y autoritativo con la API oficial de Payphone

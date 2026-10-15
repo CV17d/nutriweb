@@ -13,10 +13,11 @@ export const revalidate = 60;
 
 async function getSiteData() {
   try {
-    const [settingsRes, plansRes, casesRes] = await Promise.all([
+    const [settingsRes, plansRes, casesRes, clinicPhotosRes] = await Promise.all([
       query('SELECT key, value FROM web_settings'),
       query('SELECT * FROM plans WHERE is_active = true ORDER BY price ASC'),
-      query('SELECT * FROM success_cases WHERE is_active = true ORDER BY created_at DESC')
+      query('SELECT * FROM success_cases WHERE is_active = true ORDER BY created_at DESC'),
+      query('SELECT id, image_url, caption, display_order FROM clinic_photos WHERE is_active = true ORDER BY display_order ASC, created_at ASC')
     ]);
 
     const settings = settingsRes.rows.reduce((acc, row) => {
@@ -27,16 +28,17 @@ async function getSiteData() {
     return {
       settings,
       plans: plansRes.rows,
-      cases: casesRes.rows
+      cases: casesRes.rows,
+      clinicPhotos: clinicPhotosRes.rows
     };
   } catch (error) {
     console.error("Error loading site data:", error);
-    return { settings: {}, plans: [], cases: [] };
+    return { settings: {}, plans: [], cases: [], clinicPhotos: [] };
   }
 }
 
 export default async function Home() {
-  const { settings, plans, cases } = await getSiteData();
+  const { settings, plans, cases, clinicPhotos } = await getSiteData();
 
   return (
     <main className="flex flex-col items-center justify-start w-full relative">
@@ -44,7 +46,7 @@ export default async function Home() {
       <About data={settings.about} />
       <Methodology data={settings.methodology} />
       <Pricing plans={plans} />
-      <Location />
+      <Location photos={clinicPhotos} />
       <Testimonials cases={cases} />
       <Footer />
       <WhatsAppFAB />
