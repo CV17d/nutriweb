@@ -6,17 +6,17 @@ interface LocationProps {
 
 export default function Location({ photos = [] }: LocationProps) {
   return (
-    <section id="ubicacion" className="w-full max-w-7xl mx-auto px-6 py-12 md:py-20 scroll-mt-20">
+    <section id="ubicacion" className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12 md:py-20 scroll-mt-20">
       {/* Encabezado de la Sección */}
-      <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
+      <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-light border border-brand-electric/20 text-brand-electric text-xs font-bold tracking-wider uppercase mb-4 shadow-xs">
           <span className="w-2 h-2 rounded-full bg-brand-electric animate-pulse"></span>
           Atención Presencial & Instalaciones
         </div>
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-navy tracking-tight mb-4">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-navy tracking-tight mb-3 sm:mb-4">
           Consultorio y Ubicación
         </h2>
-        <p className="text-base md:text-lg text-brand-navy/70 leading-relaxed">
+        <p className="text-sm sm:text-base md:text-lg text-brand-navy/70 leading-relaxed">
           Conoce el espacio donde realizamos tus evaluaciones antropométricas, análisis de composición corporal y diseño de estrategias nutricionales.
         </p>
       </div>
@@ -64,7 +64,7 @@ export default function Location({ photos = [] }: LocationProps) {
             </div>
 
             {/* Dirección, Horarios y Métodos de Pago (parte inferior de la misma card) */}
-            <div className="w-full bg-slate-50/90 border-t border-gray-100 p-5 md:p-6 flex flex-col gap-4 shrink-0">
+            <div className="w-full bg-slate-50/90 border-t border-gray-100 p-4 sm:p-5 md:p-6 flex flex-col gap-4 shrink-0">
               {/* Dirección */}
               <div className="flex items-start gap-3.5">
                 <div className="w-10 h-10 rounded-2xl bg-brand-light flex items-center justify-center shrink-0 text-brand-electric">

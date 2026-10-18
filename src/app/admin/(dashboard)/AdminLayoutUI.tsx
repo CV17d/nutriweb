@@ -69,6 +69,7 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
               <Link 
                 key={link.name} 
                 href={link.href}
+                onClick={() => setIsSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-DEFAULT transition-colors font-medium ${
                   isActive 
                     ? 'bg-primary-container text-on-primary font-bold' 
@@ -86,6 +87,7 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
             href="/" 
             replace
             prefetch={true}
+            onClick={() => setIsSidebarOpen(false)}
             className="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors font-medium w-full"
           >
             <span className="material-symbols-outlined">home</span>
@@ -104,15 +106,21 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Mobile Top Header (Hidden on Desktop) */}
-        <header className="md:hidden bg-surface-container-lowest border-b border-outline-variant/30 px-margin-mobile py-4 flex items-center gap-4 sticky top-0 z-30">
-          <button onClick={toggleSidebar} className="text-on-surface-variant p-2 -ml-2 rounded-full hover:bg-surface-variant transition-colors">
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-          <span className="font-headline-md text-headline-md text-on-surface font-semibold">Menú</span>
+        <header className="md:hidden bg-surface-container-lowest border-b border-outline-variant/30 px-4 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <button onClick={toggleSidebar} className="text-on-surface-variant p-2 -ml-2 rounded-full hover:bg-surface-variant transition-colors" aria-label="Abrir menú">
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+            <span className="text-base font-bold text-on-surface">Panel Admin</span>
+          </div>
+          <Link href="/" replace className="text-xs font-semibold text-brand-electric hover:underline flex items-center gap-1">
+            <span className="material-symbols-outlined text-[16px]">home</span>
+            Ver Sitio
+          </Link>
         </header>
 
         {/* Dynamic Page Content */}
-        <div className="flex-1 overflow-y-auto bg-surface-dim p-4 md:p-8">
+        <div className="flex-1 overflow-y-auto bg-surface-dim p-3 sm:p-4 md:p-8">
           {children}
         </div>
       </main>

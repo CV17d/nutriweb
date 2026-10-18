@@ -12,9 +12,9 @@ function PricingCard({ plan }: { plan: any }) {
   const isElite = plan.name === 'Elite';
   
   return (
-    <div className={`rounded-3xl p-5 xl:p-7 flex flex-col transition-all duration-300 relative h-full
+    <div className={`w-full rounded-3xl p-5 xl:p-7 flex flex-col transition-all duration-300 relative h-full
       ${isRecommended 
-        ? 'bg-brand-navy shadow-2xl lg:scale-[1.03] z-10 border border-brand-navy/50 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]' 
+        ? 'bg-brand-navy shadow-2xl border-2 border-brand-electric ring-4 ring-brand-electric/20 lg:scale-[1.03] z-10 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]' 
         : 'bg-brand-white border border-gray-100 shadow-sm hover:-translate-y-2 hover:shadow-xl'
       }`}>
       
@@ -58,9 +58,11 @@ function PricingCard({ plan }: { plan: any }) {
         
         {features.length > 4 && (
           <button 
+            type="button"
             onClick={() => setExpanded(!expanded)}
-            className={`text-xs font-bold transition-colors mb-6 flex items-center gap-1 mt-auto
-              ${isRecommended ? 'text-brand-electric hover:text-white' : 'text-brand-electric hover:text-brand-navy'}
+            aria-expanded={expanded}
+            className={`text-xs font-bold transition-colors mb-6 flex items-center gap-1 mt-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-electric rounded
+            ${isRecommended ? 'text-brand-electric hover:text-white' : 'text-brand-electric hover:text-brand-navy'}
             `}
           >
             {expanded ? 'Ver menos' : `Ver ${features.length - 4} más...`}
@@ -71,7 +73,8 @@ function PricingCard({ plan }: { plan: any }) {
       
       <Link 
         href={`/checkout/${plan.id}`} 
-        className={`w-full inline-block text-center rounded-full py-3.5 font-bold text-xs uppercase tracking-wider transition-colors mt-auto shadow-sm
+        aria-label={`Comprar plan ${plan.name} por $${plan.price}`}
+        className={`w-full inline-block text-center rounded-full py-3.5 font-bold text-xs uppercase tracking-wider transition-colors mt-auto shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-electric
           ${isRecommended 
             ? 'bg-brand-electric text-brand-white shadow-lg hover:opacity-90' 
             : (isElite 
@@ -95,26 +98,26 @@ export default function Pricing({ plans = [] }: { plans?: any[] }) {
 
   // Clases estáticas para que Tailwind CSS compile correctamente las columnas
   const getGridColsClass = () => {
-    if (plans.length === 1) return 'grid-cols-1 max-w-md mx-auto';
-    if (plans.length === 2) return 'grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto';
-    if (plans.length === 3) return 'grid-cols-1 md:grid-cols-3 max-w-6xl mx-auto';
-    return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
+    if (plans.length === 1) return 'max-w-md mx-auto';
+    if (plans.length === 2) return 'md:grid-cols-2 max-w-4xl mx-auto';
+    if (plans.length === 3) return 'md:grid-cols-3 max-w-6xl mx-auto';
+    return 'md:grid-cols-2 lg:grid-cols-4';
   };
 
   return (
-    <section id="planes" className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
+    <section id="planes" className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 md:py-24">
       {/* Encabezado */}
-      <div className="flex flex-col items-center text-center mb-16">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-navy mb-4 tracking-tight">
+      <div className="flex flex-col items-center text-center mb-10 sm:mb-16">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-brand-navy mb-3 sm:mb-4 tracking-tight">
           Planes Nutricionales
         </h2>
-        <p className="text-base md:text-lg text-brand-navy/70 max-w-2xl">
+        <p className="text-sm sm:text-base md:text-lg text-brand-navy/70 max-w-2xl">
           Inversiones en tu salud y rendimiento. Elige la opción que mejor se adapte a tus metas y nivel de compromiso.
         </p>
       </div>
 
-      {/* Grid de Precios en una sola fila para desktop */}
-      <div className={`grid ${getGridColsClass()} gap-6 lg:gap-4 xl:gap-6 items-stretch`}>
+      {/* Lista Vertical en Móvil / Grid de Precios en escritorio */}
+      <div className={`flex flex-col md:grid ${getGridColsClass()} gap-6 lg:gap-4 xl:gap-6 items-stretch w-full`}>
         {plans.map((plan) => (
           <PricingCard key={plan.id} plan={plan} />
         ))}

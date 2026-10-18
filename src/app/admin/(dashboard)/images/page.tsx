@@ -343,7 +343,7 @@ export default function ImagesPage() {
               setNewPhotoOrder(clinicPhotos.length + 1);
               setIsAddModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-electric hover:bg-blue-700 text-white font-semibold text-sm shadow-md transition-all hover:scale-105 active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-electric hover:bg-blue-700 text-white font-semibold text-sm shadow-md transition-all hover:scale-105 active:scale-95 w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-[20px]">add_photo_alternate</span>
             Agregar Foto al Consultorio
@@ -352,16 +352,16 @@ export default function ImagesPage() {
       </div>
 
       {/* Selector de Pestañas */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('consultorio')}
-          className={`flex items-center gap-2 py-3 px-5 text-sm font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 py-3 px-4 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all ${
             activeTab === 'consultorio'
               ? 'border-brand-electric text-brand-electric bg-blue-50/50'
               : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
           }`}
         >
-          <span className="material-symbols-outlined text-[20px]">view_carousel</span>
+          <span className="material-symbols-outlined text-[18px] sm:text-[20px]">view_carousel</span>
           Fotos del Consultorio (Carrusel)
           <span className="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700 font-bold">
             {clinicPhotos.length}
@@ -370,13 +370,13 @@ export default function ImagesPage() {
 
         <button
           onClick={() => setActiveTab('principales')}
-          className={`flex items-center gap-2 py-3 px-5 text-sm font-bold border-b-2 transition-all ${
+          className={`flex items-center gap-2 py-3 px-4 sm:px-5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all ${
             activeTab === 'principales'
               ? 'border-brand-electric text-brand-electric bg-blue-50/50'
               : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
           }`}
         >
-          <span className="material-symbols-outlined text-[20px]">tune</span>
+          <span className="material-symbols-outlined text-[18px] sm:text-[20px]">tune</span>
           Imágenes Web (Hero & Sobre Mí)
         </button>
       </div>
@@ -604,7 +604,7 @@ export default function ImagesPage() {
               
               <div className="aspect-video w-full relative bg-gray-100 rounded-xl overflow-hidden mb-4 border border-gray-200">
                 {settings.hero?.imageUrl ? (
-                  <img src={settings.hero.imageUrl} alt="Hero" className="w-full h-full object-cover" />
+                  <img src={settings.hero.imageUrl} alt="Vista previa de la imagen principal del Hero" className="w-full h-full object-cover" />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full text-gray-400 text-sm">
                     Sin imagen cargada
@@ -643,7 +643,7 @@ export default function ImagesPage() {
 
               <div className="aspect-square w-48 h-48 mx-auto relative bg-gray-100 rounded-full overflow-hidden mb-4 border-4 border-white shadow-lg">
                 {settings.about?.imageUrl ? (
-                  <img src={settings.about.imageUrl} alt="About" className="w-full h-full object-cover" />
+                  <img src={settings.about.imageUrl} alt="Vista previa de la foto de perfil en sección Sobre Mí" className="w-full h-full object-cover" />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full text-gray-400 text-sm">
                     Sin imagen
@@ -671,14 +671,14 @@ export default function ImagesPage() {
 
       {/* MODAL: AGREGAR FOTO AL CARRUSEL */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-gray-100 animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="add-photo-title">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 md:p-8 shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto animate-fadeIn">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-brand-electric/10 text-brand-electric">
                   <span className="material-symbols-outlined text-xl">add_photo_alternate</span>
                 </div>
-                <h3 className="text-lg font-extrabold text-gray-900">
+                <h3 id="add-photo-title" className="text-lg font-extrabold text-gray-900">
                   Agregar Foto al Consultorio
                 </h3>
               </div>
@@ -739,8 +739,8 @@ export default function ImagesPage() {
                   <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                     Vista previa:
                   </span>
-                  <div className="aspect-[4/5] max-h-[320px] w-full rounded-xl overflow-hidden bg-gray-100 border border-gray-200 mx-auto">
-                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="aspect-[4/5] max-h-[260px] sm:max-h-[320px] w-full rounded-xl overflow-hidden bg-gray-100 border border-gray-200 mx-auto">
+                    <img src={previewUrl} alt="Vista previa de la fotografía del consultorio seleccionada" className="w-full h-full object-cover" />
                   </div>
                 </div>
               )}
@@ -779,7 +779,7 @@ export default function ImagesPage() {
               </div>
 
               {/* Botones de acción */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={() => {
@@ -788,7 +788,7 @@ export default function ImagesPage() {
                     setPreviewUrl(null);
                     setNewPhotoUrl('');
                   }}
-                  className="px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                  className="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors text-center"
                   disabled={isUploadingPhoto}
                 >
                   Cancelar
@@ -796,7 +796,7 @@ export default function ImagesPage() {
                 <button
                   type="submit"
                   disabled={isUploadingPhoto || (!newPhotoFile && !newPhotoUrl.trim())}
-                  className="px-5 py-2.5 bg-brand-electric hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-2"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-brand-electric hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
                 >
                   {isUploadingPhoto ? (
                     <>
@@ -818,23 +818,23 @@ export default function ImagesPage() {
 
       {/* MODAL: CONFIRMAR ELIMINACIÓN DE FOTO */}
       {deletingPhotoId !== null && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="delete-photo-title">
+          <div className="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-gray-100 animate-fadeIn">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-2xl">warning</span>
+              <span className="material-symbols-outlined text-2xl" aria-hidden="true">warning</span>
             </div>
-            <h3 className="text-base font-bold text-gray-900 text-center mb-1">
+            <h3 id="delete-photo-title" className="text-base font-bold text-gray-900 text-center mb-1">
               ¿Quitar foto del carrusel?
             </h3>
             <p className="text-xs text-gray-500 text-center mb-6 leading-relaxed">
               Esta foto dejará de mostrarse en la sección "Consultorio y Ubicación" de la página principal. Esta acción no se puede deshacer.
             </p>
 
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={() => setDeletingPhotoId(null)}
-                className="px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors text-center"
                 disabled={isDeleting}
               >
                 Cancelar
@@ -843,7 +843,7 @@ export default function ImagesPage() {
                 type="button"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                className="w-full sm:w-auto px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
               >
                 {isDeleting ? (
                   <span>Eliminando...</span>

@@ -1,7 +1,12 @@
 import { query } from '../lib/db';
 import { logger } from '../lib/logger';
 
-export async function createSubscription(clientId: string, planId: number, transactionId: string) {
+export async function createSubscription(
+  clientId: string, 
+  planId: number, 
+  transactionId: string,
+  installments: number = 1
+) {
   // Primero obtenemos el total de sesiones del plan
   const planQuery = await query('SELECT total_sessions FROM plans WHERE id = $1', [planId]);
   
@@ -12,13 +17,30 @@ export async function createSubscription(clientId: string, planId: number, trans
   const totalSessions = planQuery.rows[0].total_sessions;
 
   const insertQuery = `
-    INSERT INTO client_subscriptions (client_id, plan_id, transaction_id, total_sessions, sessions_remaining, sessions_used, status)
-    VALUES ($1, $2, $3, $4, $5, 0, 'active')
+    INSERT INTO client_subscriptions (client_id, plan_id, transaction_id, total_sessions, sessions_remaining, sessions_used, status, installments)
+    VALUES ($1, $2, $3, $4, $5, 0, 'active', $6)
     ON CONFLICT (transaction_id) DO NOTHING
     RETURNING id;
   `;
 
-  const result = await query(insertQuery, [clientId, planId, transactionId, totalSessions, totalSessions]);
+  let result;
+  try {
+    result = await query(insertQuery, [clientId, planId, transactionId, totalSessions, totalSessions, installments]);
+  } catch (err: any) {
+    if (err.message && (err.message.includes('installments') || err.code === '42703')) {
+      logger.warn({ message: 'Fallback insert en client_subscriptions sin columna installments', error: err.message });
+      const fallbackQuery = `
+        INSERT INTO client_subscriptions (client_id, plan_id, transaction_id, total_sessions, sessions_remaining, sessions_used, status)
+        VALUES ($1, $2, $3, $4, $5, 0, 'active')
+        ON CONFLICT (transaction_id) DO NOTHING
+        RETURNING id;
+      `;
+      result = await query(fallbackQuery, [clientId, planId, transactionId, totalSessions, totalSessions]);
+    } else {
+      throw err;
+    }
+  }
+
   let subscriptionId = result.rows[0]?.id;
   
   if (!subscriptionId) {
@@ -27,7 +49,7 @@ export async function createSubscription(clientId: string, planId: number, trans
     subscriptionId = existing.rows[0]?.id;
   }
   
-  logger.info({ message: 'Suscripción procesada exitosamente', subscriptionId, clientId, transactionId });
+  logger.info({ message: 'Suscripción procesada exitosamente', subscriptionId, clientId, transactionId, installments });
   return subscriptionId;
 }
 

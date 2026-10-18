@@ -116,12 +116,12 @@ export default function ContentPage() {
   if (loading) return <div>Cargando contenido...</div>;
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold text-gray-900">Gestión de Contenido</h1>
+    <div className="space-y-6 sm:space-y-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Contenido</h1>
 
       {/* Hero Section */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-bold mb-4 border-b pb-2">Sección Principal (Hero)</h2>
+      <div className="bg-white rounded-2xl shadow p-4 sm:p-6 border border-gray-100">
+        <h2 className="text-lg sm:text-xl font-bold mb-4 border-b pb-2">Sección Principal (Hero)</h2>
         <div className="space-y-4">
           <div>
             <RichTextEditor
@@ -139,16 +139,16 @@ export default function ContentPage() {
               multiline={true}
             />
           </div>
-          <div className="flex space-x-2">
-            <button onClick={() => saveSetting('hero', { title: heroTitle, subtitle: heroSubtitle })} className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Guardar Hero</button>
-            <button onClick={() => setResetModal('hero')} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Restablecer</button>
+          <div className="flex flex-wrap gap-2.5 pt-2">
+            <button onClick={() => saveSetting('hero', { title: heroTitle, subtitle: heroSubtitle })} className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 text-xs sm:text-sm font-semibold shadow-xs">Guardar Hero</button>
+            <button onClick={() => setResetModal('hero')} className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-700 text-xs sm:text-sm font-semibold shadow-xs">Restablecer</button>
           </div>
         </div>
       </div>
 
       {/* About Section */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-bold mb-4 border-b pb-2">Sección Sobre Mí</h2>
+      <div className="bg-white rounded-2xl shadow p-4 sm:p-6 border border-gray-100">
+        <h2 className="text-lg sm:text-xl font-bold mb-4 border-b pb-2">Sección Sobre Mí</h2>
         <div className="space-y-4">
           <div>
             <RichTextEditor
@@ -166,38 +166,38 @@ export default function ContentPage() {
               multiline={true}
             />
           </div>
-          <div className="flex space-x-2">
-            <button onClick={() => saveSetting('about', { title: aboutTitle, content: aboutContent })} className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Guardar Sobre Mí</button>
-            <button onClick={() => setResetModal('about')} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Restablecer</button>
+          <div className="flex flex-wrap gap-2.5 pt-2">
+            <button onClick={() => saveSetting('about', { title: aboutTitle, content: aboutContent })} className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 text-xs sm:text-sm font-semibold shadow-xs">Guardar Sobre Mí</button>
+            <button onClick={() => setResetModal('about')} className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-700 text-xs sm:text-sm font-semibold shadow-xs">Restablecer</button>
           </div>
         </div>
       </div>
 
       {/* Testimonials */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4 border-b pb-2">
-          <h2 className="text-xl font-bold">Casos de Éxito (Testimonios)</h2>
-          <button onClick={() => setEditingCase({ patient_name: '', comment: '', metrics: '', image_url: '', rating: 5 })} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">Añadir Testimonio</button>
+      <div className="bg-white rounded-2xl shadow p-4 sm:p-6 border border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 border-b pb-3">
+          <h2 className="text-lg sm:text-xl font-bold">Casos de Éxito (Testimonios)</h2>
+          <button onClick={() => setEditingCase({ patient_name: '', comment: '', metrics: '', image_url: '', rating: 5 })} className="w-full sm:w-auto bg-green-600 text-white px-3.5 py-1.5 rounded-xl hover:bg-green-700 text-xs sm:text-sm font-semibold shadow-xs text-center">+ Añadir Testimonio</button>
         </div>
 
         {editingCase && (
-          <form onSubmit={handleSaveCase} className="mb-6 bg-gray-50 p-4 rounded-md border space-y-4">
-            <h3 className="font-bold">{editingCase.id ? 'Editar Testimonio' : 'Nuevo Testimonio'}</h3>
+          <form onSubmit={handleSaveCase} className="mb-6 bg-gray-50 p-4 sm:p-5 rounded-2xl border space-y-4">
+            <h3 className="font-bold text-base sm:text-lg">{editingCase.id ? 'Editar Testimonio' : 'Nuevo Testimonio'}</h3>
             <div>
-              <label className="block text-sm font-medium">Nombre del Paciente</label>
-              <input required type="text" value={editingCase.patient_name} onChange={e => setEditingCase({...editingCase, patient_name: e.target.value})} className="w-full p-2 border rounded" />
+              <label className="block text-xs sm:text-sm font-medium mb-1">Nombre del Paciente</label>
+              <input required type="text" value={editingCase.patient_name} onChange={e => setEditingCase({...editingCase, patient_name: e.target.value})} className="w-full p-2.5 border rounded-xl text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium">Testimonio</label>
-              <textarea required rows={3} value={editingCase.comment} onChange={e => setEditingCase({...editingCase, comment: e.target.value})} className="w-full p-2 border rounded" />
+              <label className="block text-xs sm:text-sm font-medium mb-1">Testimonio</label>
+              <textarea required rows={3} value={editingCase.comment} onChange={e => setEditingCase({...editingCase, comment: e.target.value})} className="w-full p-2.5 border rounded-xl text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium">Métricas logradas (opcional)</label>
-              <input type="text" value={editingCase.metrics} onChange={e => setEditingCase({...editingCase, metrics: e.target.value})} className="w-full p-2 border rounded" placeholder="-10kg, +5kg músculo..." />
+              <label className="block text-xs sm:text-sm font-medium mb-1">Métricas logradas (opcional)</label>
+              <input type="text" value={editingCase.metrics} onChange={e => setEditingCase({...editingCase, metrics: e.target.value})} className="w-full p-2.5 border rounded-xl text-sm" placeholder="-10kg, +5kg músculo..." />
             </div>
             <div>
-              <label className="block text-sm font-medium">Calificación (Estrellas)</label>
-              <select value={editingCase.rating || 5} onChange={e => setEditingCase({...editingCase, rating: parseInt(e.target.value)})} className="w-full p-2 border rounded">
+              <label className="block text-xs sm:text-sm font-medium mb-1">Calificación (Estrellas)</label>
+              <select value={editingCase.rating || 5} onChange={e => setEditingCase({...editingCase, rating: parseInt(e.target.value)})} className="w-full p-2.5 border rounded-xl text-sm">
                 <option value="5">5 Estrellas ⭐⭐⭐⭐⭐</option>
                 <option value="4">4 Estrellas ⭐⭐⭐⭐</option>
                 <option value="3">3 Estrellas ⭐⭐⭐</option>
@@ -205,24 +205,24 @@ export default function ContentPage() {
                 <option value="1">1 Estrella ⭐</option>
               </select>
             </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setEditingCase(null)} className="px-3 py-1 bg-gray-300 rounded">Cancelar</button>
-              <button type="submit" className="px-3 py-1 bg-green-600 text-white rounded">Guardar</button>
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-2">
+              <button type="button" onClick={() => setEditingCase(null)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium text-xs sm:text-sm text-center">Cancelar</button>
+              <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-xl font-bold text-xs sm:text-sm text-center">Guardar</button>
             </div>
           </form>
         )}
 
         <div className="space-y-4">
           {cases.map(c => (
-            <div key={c.id} className="p-4 border rounded flex justify-between items-start">
-              <div>
-                <h3 className="font-bold">{c.patient_name} <span className="text-yellow-400 text-sm">{'⭐'.repeat(c.rating || 5)}</span></h3>
-                <p className="text-gray-600 text-sm mt-1">{c.comment}</p>
-                {c.metrics && <p className="text-green-600 text-sm font-bold mt-2">{c.metrics}</p>}
+            <div key={c.id} className="p-4 border rounded-2xl flex flex-col sm:flex-row justify-between items-start gap-4">
+              <div className="flex-1">
+                <h3 className="font-bold text-sm sm:text-base">{c.patient_name} <span className="text-yellow-400 text-xs sm:text-sm">{'⭐'.repeat(c.rating || 5)}</span></h3>
+                <p className="text-gray-600 text-xs sm:text-sm mt-1 leading-relaxed">{c.comment}</p>
+                {c.metrics && <p className="text-green-600 text-xs sm:text-sm font-bold mt-2">{c.metrics}</p>}
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => setEditingCase(c)} className="text-blue-600 text-sm">Editar</button>
-                <button onClick={() => c.id && deleteCase(c.id)} className="text-red-600 text-sm">Eliminar</button>
+              <div className="flex gap-3 shrink-0 self-end sm:self-start">
+                <button onClick={() => setEditingCase(c)} className="text-blue-600 text-xs sm:text-sm font-semibold hover:underline">Editar</button>
+                <button onClick={() => c.id && deleteCase(c.id)} className="text-red-600 text-xs sm:text-sm font-semibold hover:underline">Eliminar</button>
               </div>
             </div>
           ))}

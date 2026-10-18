@@ -157,9 +157,10 @@ async function processPaymentConfirmation({
     const clientPhone = meta.clientPhone || confirmResult.phoneNumber || undefined;
     const date = meta.firstAppointmentDate;
     const appointmentType = meta.appointmentType || 'Virtual';
+    const installments = transaction.installments || meta.installments || 1;
 
     // 7. Crear la suscripción de forma idempotente
-    const subscriptionId = await createSubscription(clientId, transaction.plan_id, clientTransactionId);
+    const subscriptionId = await createSubscription(clientId, transaction.plan_id, clientTransactionId, installments);
 
     // 8. Crear y agendar la 1ra cita solo si no existe ya para esta suscripción
     if (date && subscriptionId) {

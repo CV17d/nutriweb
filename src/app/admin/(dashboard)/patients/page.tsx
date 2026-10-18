@@ -118,24 +118,24 @@ export default function PatientsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Control de Pacientes</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Control de Pacientes</h1>
         
         {selectedIds.length > 0 && (
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow transition-colors"
+            className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-colors text-sm"
           >
             Borrar Seleccionados ({selectedIds.length})
           </button>
         )}
       </div>
       
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="bg-white rounded-xl shadow overflow-x-auto w-full border border-gray-100">
+        <table className="min-w-full divide-y divide-gray-200 text-left">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left w-12">
+              <th className="px-4 sm:px-6 py-3 text-left w-12">
                 <input 
                   type="checkbox" 
                   className="rounded border-gray-300 text-brand-electric focus:ring-brand-electric"
@@ -153,7 +153,7 @@ export default function PatientsPage() {
           <tbody className="bg-white divide-y divide-gray-200">
             {patients.map((patient) => (
               <tr key={patient.subscription_id} className={selectedIds.includes(patient.subscription_id) ? 'bg-red-50' : ''}>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                   <input 
                     type="checkbox" 
                     className="rounded border-gray-300 text-brand-electric focus:ring-brand-electric"
@@ -161,28 +161,28 @@ export default function PatientsPage() {
                     onChange={() => toggleSelect(patient.subscription_id)}
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                  <div className="text-sm text-gray-500">{patient.email}</div>
+                  <div className="text-xs sm:text-sm text-gray-500">{patient.email}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                  <span className="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                     {patient.plan_name}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                   {patient.sessions_remaining} / {patient.total_sessions}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${patient.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${patient.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                     {patient.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
                   <button
                     onClick={() => sendAgendaLink(patient.id, patient.subscription_id)}
                     disabled={sendingLink === patient.subscription_id || patient.status !== 'active'}
-                    className="text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded disabled:opacity-50"
+                    className="text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg disabled:opacity-50 text-xs font-semibold shadow-xs transition-colors"
                   >
                     {sendingLink === patient.subscription_id ? 'Enviando...' : 'Enviar Enlace'}
                   </button>
@@ -191,7 +191,7 @@ export default function PatientsPage() {
             ))}
             {patients.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={6} className="px-4 sm:px-6 py-8 text-center text-gray-500 text-sm">
                   No hay pacientes activos
                 </td>
               </tr>
@@ -202,27 +202,27 @@ export default function PatientsPage() {
 
       {/* Modal de Confirmación Segura */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-2xl font-bold text-red-600 mb-2">Confirmar Eliminación</h2>
-            <p className="text-gray-600 mb-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4" role="dialog" aria-modal="true" aria-labelledby="modal-delete-title">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 sm:p-6">
+            <h2 id="modal-delete-title" className="text-xl sm:text-2xl font-bold text-red-600 mb-2">Confirmar Eliminación</h2>
+            <p className="text-gray-600 text-xs sm:text-sm mb-6 leading-relaxed">
               Estás a punto de eliminar definitivamente <strong>{selectedIds.length}</strong> paciente(s) y sus citas asociadas. 
               Esta acción no se puede deshacer.
             </p>
             
             <form onSubmit={handleDelete}>
-              <div className="flex gap-3 justify-end">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors font-medium text-xs sm:text-sm text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit"
                   disabled={isDeleting}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-bold disabled:opacity-50"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-bold disabled:opacity-50 text-xs sm:text-sm text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
                 >
                   {isDeleting ? 'Borrando...' : 'Confirmar Borrado'}
                 </button>

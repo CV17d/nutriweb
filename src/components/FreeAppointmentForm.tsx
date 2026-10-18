@@ -23,6 +23,7 @@ export default function FreeAppointmentForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -87,6 +88,12 @@ export default function FreeAppointmentForm() {
       return;
     }
 
+    if (!acceptedTerms) {
+      setErrorMessage("Debes aceptar las Políticas de Privacidad y Términos de Servicio para continuar.");
+      setStatus("error");
+      return;
+    }
+
     setStatus("loading");
 
     try {
@@ -145,7 +152,7 @@ export default function FreeAppointmentForm() {
     const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
     for (let i = 0; i < startDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-10 w-10"></div>);
+      days.push(<div key={`empty-${i}`} className="h-9 w-9 sm:h-10 sm:w-10"></div>);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -160,7 +167,7 @@ export default function FreeAppointmentForm() {
           type="button"
           disabled={isPast || isSunday}
           onClick={() => handleDateSelect(day)}
-          className={`h-10 w-10 flex items-center justify-center rounded-full text-sm transition-colors ${
+          className={`h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-xs sm:text-sm transition-colors ${
             isPast || isSunday
               ? "text-gray-300 cursor-not-allowed bg-gray-50/50 pointer-events-none opacity-50"
               : isSelected
@@ -174,31 +181,33 @@ export default function FreeAppointmentForm() {
     }
 
     return (
-      <div className="w-full">
-        <div className="flex justify-between items-center mb-6 px-2">
-          <button type="button" onClick={handlePrevMonth} disabled={isCurrentMonth} className="p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h3 className="text-lg font-bold text-gray-800 tracking-wide">
-            {currentDate.toLocaleString("es-ES", { month: "long", year: "numeric" }).replace(/^\w/, (c) => c.toUpperCase())}
-          </h3>
-          <button type="button" onClick={handleNextMonth} disabled={isMaxMonth} className="p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
+      <div className="w-full overflow-x-auto">
+        <div className="min-w-[280px]">
+          <div className="flex justify-between items-center mb-6 px-2">
+            <button type="button" onClick={handlePrevMonth} disabled={isCurrentMonth} className="p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 tracking-wide">
+              {currentDate.toLocaleString("es-ES", { month: "long", year: "numeric" }).replace(/^\w/, (c) => c.toUpperCase())}
+            </h3>
+            <button type="button" onClick={handleNextMonth} disabled={isMaxMonth} className="p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
 
-        <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-semibold text-gray-500">
-          {daysOfWeek.map((day) => (
-            <div key={day} className="py-2">{day}</div>
-          ))}
-        </div>
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-[11px] sm:text-xs font-semibold text-gray-500">
+            {daysOfWeek.map((day) => (
+              <div key={day} className="py-2">{day}</div>
+            ))}
+          </div>
 
-        <div className="grid grid-cols-7 gap-y-4 gap-x-2 justify-items-center">
-          {days}
+          <div className="grid grid-cols-7 gap-y-3 sm:gap-y-4 gap-x-1 sm:gap-x-2 justify-items-center">
+            {days}
+          </div>
         </div>
       </div>
     );
@@ -236,17 +245,17 @@ export default function FreeAppointmentForm() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto w-full space-y-8">
+    <div className="max-w-3xl mx-auto w-full space-y-6 sm:space-y-8">
       {status === "success" ? (
-        <div className="bg-white border border-brand-electric/20 rounded-3xl p-10 text-center shadow-lg relative overflow-hidden">
+        <div className="bg-white border border-brand-electric/20 rounded-3xl p-6 sm:p-10 text-center shadow-lg relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-electric to-blue-400"></div>
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 text-brand-electric mb-6 shadow-inner">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-50 text-brand-electric mb-5 sm:mb-6 shadow-inner">
+            <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 className="text-3xl font-extrabold text-brand-navy mb-3 tracking-tight">¡Casi listo! Revisa tu correo</h3>
-          <p className="text-gray-500 text-lg max-w-md mx-auto mb-8">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-brand-navy mb-3 tracking-tight">¡Casi listo! Revisa tu correo</h3>
+          <p className="text-gray-500 text-sm sm:text-base md:text-lg max-w-md mx-auto mb-6 sm:mb-8 leading-relaxed">
             Para evitar el spam, te hemos enviado un correo de confirmación. Por favor, <strong>haz clic en el enlace</strong> de ese correo para confirmar y agendar tu cita definitivamente.
           </p>
           
@@ -254,17 +263,17 @@ export default function FreeAppointmentForm() {
             <Link 
               href="/"
               replace
-              className="px-8 py-3.5 bg-[#0052FF] text-white rounded-full font-bold hover:bg-blue-700 transition-colors shadow-md inline-block text-center"
+              className="px-8 py-3.5 bg-[#0052FF] text-white rounded-full font-bold hover:bg-blue-700 transition-colors shadow-md inline-block text-center text-sm sm:text-base"
             >
               Volver al inicio
             </Link>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           
           {/* Info Banner */}
-          <div className="bg-blue-50 text-blue-700 px-6 py-4 rounded-2xl text-sm font-medium flex items-start sm:items-center">
+          <div className="bg-blue-50 text-blue-700 px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl text-xs sm:text-sm font-medium flex items-start sm:items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-blue-500 mt-0.5 sm:mt-0 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
@@ -272,15 +281,15 @@ export default function FreeAppointmentForm() {
           </div>
 
           {/* Card: Calendar */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-8 h-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-bold text-sm">
+          <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+              <div className="w-8 h-8 rounded-full bg-[#0052FF] text-white flex items-center justify-center font-bold text-sm shrink-0">
                 1
               </div>
-              <h2 className="text-2xl font-bold text-gray-800">Selecciona la Fecha</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Selecciona la Fecha</h2>
             </div>
             
-            <div className="bg-slate-50/50 rounded-2xl p-6 border border-gray-50">
+            <div className="bg-slate-50/50 rounded-2xl p-3 sm:p-6 border border-gray-50 overflow-x-auto">
               {renderCalendar()}
 
               {selectedDate && (
@@ -321,24 +330,24 @@ export default function FreeAppointmentForm() {
 
 
           {/* Card: Contact Info */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm">
+          <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+              <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm shrink-0">
                 2
               </div>
-              <h2 className="text-2xl font-bold text-gray-800">Datos de Contacto</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Datos de Contacto</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600 ml-1">Nombre Completo</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-1.5 sm:space-y-2">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 ml-1">Nombre Completo</label>
                 <input
                   type="text"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
                   placeholder="Ej. Juan Pérez"
-                  className="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0052FF]/20 focus:border-[#0052FF] transition-all bg-slate-50/50"
+                  className="w-full px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0052FF]/20 focus:border-[#0052FF] transition-all bg-slate-50/50 text-sm sm:text-base"
                   required
                   maxLength={50}
                   pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
@@ -346,15 +355,15 @@ export default function FreeAppointmentForm() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600 ml-1">Teléfono</label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 ml-1">Teléfono</label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="Ej. +593 99 999 9999"
-                  className="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0052FF]/20 focus:border-[#0052FF] transition-all bg-slate-50/50"
+                  className="w-full px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0052FF]/20 focus:border-[#0052FF] transition-all bg-slate-50/50 text-sm sm:text-base"
                   required
                   maxLength={20}
                   pattern="[\+0-9\s\-]+"
@@ -362,15 +371,15 @@ export default function FreeAppointmentForm() {
                 />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-medium text-gray-600 ml-1">Correo Electrónico</label>
+              <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 ml-1">Correo Electrónico</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="juan@ejemplo.com"
-                  className="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0052FF]/20 focus:border-[#0052FF] transition-all bg-slate-50/50"
+                  className="w-full px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0052FF]/20 focus:border-[#0052FF] transition-all bg-slate-50/50 text-sm sm:text-base"
                   required
                   maxLength={100}
                 />
@@ -380,25 +389,53 @@ export default function FreeAppointmentForm() {
 
           {/* Error Message */}
           {status === "error" && (
-            <div className="bg-red-50 text-red-600 px-6 py-4 rounded-xl text-sm font-medium flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <div className="bg-red-50 text-red-600 px-4 sm:px-6 py-3.5 sm:py-4 rounded-xl text-sm font-medium flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
-              {errorMessage}
+              <span>{errorMessage}</span>
             </div>
           )}
 
           {/* Submit Button */}
-          <div className="flex flex-col items-center gap-6 mt-8">
-            <ReCAPTCHA
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
-              onChange={(token) => setCaptchaToken(token)}
-            />
+          <div className="flex flex-col items-center gap-6 mt-6 sm:mt-8">
+            <div className="w-full flex justify-center overflow-x-auto max-w-full py-1">
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                onChange={(token) => setCaptchaToken(token)}
+              />
+            </div>
             
+            {/* Checkbox de Consentimiento Legal */}
+            <div className="w-full max-w-md bg-white p-4 rounded-2xl border border-gray-100 shadow-xs">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="free-terms"
+                  name="acceptedTerms"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  required
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-[#0052FF] focus:ring-[#0052FF] focus:ring-offset-0 cursor-pointer"
+                />
+                <label htmlFor="free-terms" className="text-xs sm:text-sm text-gray-700 leading-snug cursor-pointer select-none">
+                  He leído y acepto las{" "}
+                  <Link href="/legal/privacidad" target="_blank" className="text-[#0052FF] font-semibold underline hover:text-blue-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#0052FF] rounded">
+                    Políticas de Privacidad
+                  </Link>{" "}
+                  y los{" "}
+                  <Link href="/legal/terminos" target="_blank" className="text-[#0052FF] font-semibold underline hover:text-blue-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#0052FF] rounded">
+                    Términos del Servicio
+                  </Link>
+                  , consintiendo el tratamiento confidencial de mis datos de salud.
+                </label>
+              </div>
+            </div>
+
             <button
               type="submit"
-              disabled={status === "loading" || !selectedDate || !selectedTime || !captchaToken}
-              className="px-8 py-4 bg-[#0052FF] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+              disabled={status === "loading" || !selectedDate || !selectedTime || !captchaToken || !acceptedTerms}
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-[#0052FF] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-full font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#0052FF]"
             >
               {status === "loading" ? (
                 <>
@@ -410,8 +447,8 @@ export default function FreeAppointmentForm() {
                 </>
               ) : (
                 <>
-                  Confirmar y Agendar Cita
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <span>Confirmar y Agendar Cita</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </>

@@ -1,14 +1,45 @@
 import { query } from '../lib/db';
 import { logger } from '../lib/logger';
 
-export async function createTransaction(clientId: string, planId: number, amount: number, metadata?: any) {
+export async function createTransaction(
+  clientId: string, 
+  planId: number, 
+  amount: number, 
+  metadata?: any,
+  installments: number = 1
+) {
   const insertQuery = `
-    INSERT INTO transactions (client_id, plan_id, amount, status, metadata)
-    VALUES ($1, $2, $3, 'pending', $4)
+    INSERT INTO transactions (client_id, plan_id, amount, status, metadata, installments)
+    VALUES ($1, $2, $3, 'pending', $4, $5)
     RETURNING id;
   `;
-  const result = await query(insertQuery, [clientId, planId, amount, metadata ? JSON.stringify(metadata) : null]);
-  return result.rows[0].id;
+  try {
+    const result = await query(insertQuery, [
+      clientId, 
+      planId, 
+      amount, 
+      metadata ? JSON.stringify(metadata) : null,
+      installments
+    ]);
+    return result.rows[0].id;
+  } catch (err: any) {
+    if (err.message && (err.message.includes('installments') || err.code === '42703')) {
+      logger.warn({ message: 'Fallback insert en transactions sin columna installments', error: err.message });
+      const fallbackQuery = `
+        INSERT INTO transactions (client_id, plan_id, amount, status, metadata)
+        VALUES ($1, $2, $3, 'pending', $4)
+        RETURNING id;
+      `;
+      const fallbackResult = await query(fallbackQuery, [
+        clientId, 
+        planId, 
+        amount, 
+        metadata ? JSON.stringify(metadata) : null
+      ]);
+      return fallbackResult.rows[0].id;
+    }
+    throw err;
+  }
 }
 
 /**

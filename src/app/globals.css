@@ -104,6 +104,10 @@
   html {
     scroll-padding-top: 5.5rem;
   }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-electric, #0052FF);
+    outline-offset: 2px;
+  }
   .sidebar-transition {
     transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
   }

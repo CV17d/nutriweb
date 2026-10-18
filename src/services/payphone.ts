@@ -17,6 +17,9 @@ export interface PayphoneConfirmResponse {
   document?: string;
   cardBrand?: string;
   cardType?: string;
+  deferred?: boolean;
+  deferredCode?: string;
+  deferredMessage?: string;
   message?: string | null;
   errorCode?: number;
 }

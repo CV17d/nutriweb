@@ -50,25 +50,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8 bg-white p-6 sm:p-10 rounded-2xl shadow-lg border border-gray-100">
         <div>
-          <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="mt-2 text-center text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
             Acceso Administrador
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-500">
+          <p className="mt-2 text-center text-xs sm:text-sm text-gray-500">
             Ingresa tu contraseña maestra para continuar
           </p>
         </div>
 
         {sessionNotice && (
-          <div className="text-amber-800 text-sm font-medium bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-center gap-2">
-            <span className="material-symbols-outlined text-amber-600 text-lg">info</span>
-            <span>{sessionNotice}</span>
+          <div className="text-amber-800 text-xs sm:text-sm font-medium bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-start sm:items-center gap-2">
+            <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5 sm:mt-0">info</span>
+            <span className="flex-1">{sessionNotice}</span>
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        <form className="mt-6 sm:mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="password" className="sr-only">
@@ -79,7 +79,7 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
-                className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 focus:z-10 text-sm"
                 placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -88,8 +88,9 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-md">
-              {error}
+            <div className="text-red-600 text-xs sm:text-sm font-medium bg-red-50 border border-red-200 p-3 rounded-xl flex items-start gap-2 break-words text-left">
+              <span className="material-symbols-outlined text-red-500 text-lg shrink-0 mt-0.5">error</span>
+              <span className="flex-1 leading-relaxed">{error}</span>
             </div>
           )}
 
@@ -97,7 +98,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
             >
               {loading ? 'Iniciando sesión...' : 'Entrar al Panel'}
             </button>

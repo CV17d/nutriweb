@@ -132,17 +132,17 @@ export default async function AdminDashboard() {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Título móvil */}
-      <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold md:hidden mb-4">
+      <h1 className="text-xl sm:text-2xl font-bold text-on-surface md:hidden mb-2">
         Resumen General
       </h1>
       
-      {/* KPI Bento Grid: Sin leads, con métricas reales operativas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      {/* KPI Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 md:gap-6">
         {/* KPI 1: Suscripciones Activas */}
-        <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 flex flex-col justify-between hover:border-brand-electric/50 transition-colors shadow-xs">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-secondary-container/30 rounded-xl text-secondary">
-              <span className="material-symbols-outlined text-[24px]">verified_user</span>
+        <div className="bg-surface-container-lowest rounded-2xl p-4 sm:p-6 border border-outline-variant/30 flex flex-col justify-between hover:border-brand-electric/50 transition-colors shadow-xs">
+          <div className="flex justify-between items-start mb-3 sm:mb-4">
+            <div className="p-2.5 sm:p-3 bg-secondary-container/30 rounded-xl text-secondary">
+              <span className="material-symbols-outlined text-[20px] sm:text-[24px]">verified_user</span>
             </div>
             <Link
               href="/admin/patients"
@@ -152,44 +152,44 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <div>
-            <h3 className="text-on-surface-variant font-medium text-sm mb-1">Suscripciones Activas</h3>
-            <p className="font-headline-xl text-3xl md:text-4xl font-extrabold text-on-surface">
+            <h3 className="text-on-surface-variant font-medium text-xs sm:text-sm mb-1">Suscripciones Activas</h3>
+            <p className="font-headline-xl text-2xl sm:text-3xl md:text-4xl font-extrabold text-on-surface">
               {data.activeSubscriptions}
             </p>
           </div>
         </div>
         
         {/* KPI 2: Citas Semanales y del Mes */}
-        <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 flex flex-col justify-between hover:border-brand-electric/50 transition-colors shadow-xs">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-tertiary-container/10 rounded-xl text-tertiary">
-              <span className="material-symbols-outlined text-[24px]">calendar_month</span>
+        <div className="bg-surface-container-lowest rounded-2xl p-4 sm:p-6 border border-outline-variant/30 flex flex-col justify-between hover:border-brand-electric/50 transition-colors shadow-xs">
+          <div className="flex justify-between items-start mb-3 sm:mb-4">
+            <div className="p-2.5 sm:p-3 bg-tertiary-container/10 rounded-xl text-tertiary">
+              <span className="material-symbols-outlined text-[20px] sm:text-[24px]">calendar_month</span>
             </div>
-            <span className="text-secondary text-xs px-2.5 py-1 bg-surface-container rounded-full font-bold">
+            <span className="text-secondary text-[11px] sm:text-xs px-2.5 py-1 bg-surface-container rounded-full font-bold">
               {data.weeklyAppointments} esta semana
             </span>
           </div>
           <div>
-            <h3 className="text-on-surface-variant font-medium text-sm mb-1">Citas del Mes</h3>
-            <p className="font-headline-xl text-3xl md:text-4xl font-extrabold text-on-surface">
+            <h3 className="text-on-surface-variant font-medium text-xs sm:text-sm mb-1">Citas del Mes</h3>
+            <p className="font-headline-xl text-2xl sm:text-3xl md:text-4xl font-extrabold text-on-surface">
               {data.monthlyAppointments}
             </p>
           </div>
         </div>
         
         {/* KPI 3: Ingresos Totales */}
-        <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 flex flex-col justify-between hover:border-brand-electric/50 transition-colors relative overflow-hidden shadow-xs">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-brand-electric rounded-xl text-white">
-              <span className="material-symbols-outlined text-[24px]">payments</span>
+        <div className="bg-surface-container-lowest rounded-2xl p-4 sm:p-6 border border-outline-variant/30 flex flex-col justify-between hover:border-brand-electric/50 transition-colors relative overflow-hidden shadow-xs">
+          <div className="flex justify-between items-start mb-3 sm:mb-4">
+            <div className="p-2.5 sm:p-3 bg-brand-electric rounded-xl text-white">
+              <span className="material-symbols-outlined text-[20px] sm:text-[24px]">payments</span>
             </div>
-            <span className="text-secondary text-xs px-2.5 py-1 bg-surface-container rounded-full font-bold">
+            <span className="text-secondary text-[11px] sm:text-xs px-2.5 py-1 bg-surface-container rounded-full font-bold">
               ${data.totalIncome.toLocaleString('es-EC', { minimumFractionDigits: 2 })} acumulado
             </span>
           </div>
           <div>
-            <h3 className="text-on-surface-variant font-medium text-sm mb-1">Ingresos del Mes</h3>
-            <p className="font-headline-xl text-3xl md:text-4xl font-extrabold text-brand-electric">
+            <h3 className="text-on-surface-variant font-medium text-xs sm:text-sm mb-1">Ingresos del Mes</h3>
+            <p className="font-headline-xl text-2xl sm:text-3xl md:text-4xl font-extrabold text-brand-electric">
               ${data.monthlyIncome.toLocaleString('es-EC', { minimumFractionDigits: 2 })}
             </p>
           </div>
@@ -199,47 +199,47 @@ export default async function AdminDashboard() {
       {/* Área Principal de Contenido */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Tabla Principal: Transacciones y Pagos Reales (Reemplaza la tabla estática de leads) */}
+        {/* Tabla Principal: Transacciones y Pagos Reales */}
         <div className="lg:col-span-2 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 flex flex-col overflow-hidden shadow-xs">
-          <div className="px-6 py-5 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low">
+          <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-low">
             <div>
-              <h2 className="font-headline-md text-base md:text-lg font-bold text-on-surface">
+              <h2 className="font-headline-md text-sm sm:text-base md:text-lg font-bold text-on-surface">
                 Transacciones y Pagos Recientes
               </h2>
-              <p className="text-xs text-on-surface-variant mt-0.5">
+              <p className="text-[11px] sm:text-xs text-on-surface-variant mt-0.5">
                 Historial de contrataciones en línea de planes nutricionales
               </p>
             </div>
             <Link 
               href="/admin/plans" 
-              className="text-brand-electric font-semibold text-xs hover:underline flex items-center gap-1"
+              className="text-brand-electric font-semibold text-xs hover:underline flex items-center gap-1 shrink-0"
             >
               Planes <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto w-full">
             {data.recentTransactions.length === 0 ? (
-              <div className="p-12 text-center text-sm text-gray-500">
+              <div className="p-8 sm:p-12 text-center text-sm text-gray-500">
                 No hay transacciones registradas aún.
               </div>
             ) : (
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse min-w-[550px]">
                 <thead>
                   <tr className="border-b border-outline-variant/30 bg-surface-container-lowest">
-                    <th className="px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
                       Cliente
                     </th>
-                    <th className="px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
                       Fecha
                     </th>
-                    <th className="px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
                       Plan / Monto
                     </th>
-                    <th className="px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider">
                       Estado
                     </th>
-                    <th className="px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">
+                    <th className="px-4 sm:px-6 py-3.5 text-xs font-bold text-on-surface-variant uppercase tracking-wider text-right">
                       WhatsApp
                     </th>
                   </tr>

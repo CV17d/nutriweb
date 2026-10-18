@@ -84,69 +84,69 @@ export default function PlansPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Gestión de Planes</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Planes</h1>
         <button 
           onClick={() => setEditingPlan({ name: '', price: 0, duration_months: 1, description: '', total_sessions: 1, is_active: true, is_recommended: false, features: [] })}
-          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+          className="w-full sm:w-auto bg-green-600 text-white px-4 py-2.5 rounded-xl hover:bg-green-700 font-semibold text-sm shadow-xs transition-colors text-center"
         >
-          Añadir Plan
+          + Añadir Plan
         </button>
       </div>
 
       {editingPlan ? (
-        <div className="bg-white rounded-lg shadow p-6 mb-6 border border-gray-200">
-          <h2 className="text-xl font-bold mb-4">{editingPlan.id ? 'Editar Plan' : 'Nuevo Plan'}</h2>
+        <div className="bg-white rounded-2xl shadow p-4 sm:p-6 mb-6 border border-gray-200">
+          <h2 className="text-lg sm:text-xl font-bold mb-4">{editingPlan.id ? 'Editar Plan' : 'Nuevo Plan'}</h2>
           <form onSubmit={handleSave} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                <input type="text" required value={editingPlan.name} onChange={(e) => setEditingPlan({...editingPlan, name: e.target.value})} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border" />
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                <input type="text" required value={editingPlan.name} onChange={(e) => setEditingPlan({...editingPlan, name: e.target.value})} className="block w-full rounded-xl border-gray-300 shadow-xs focus:border-green-500 focus:ring-green-500 text-sm p-2.5 border" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Precio (USD/EUR)</label>
-                <input type="number" step="0.01" required value={editingPlan.price} onChange={(e) => setEditingPlan({...editingPlan, price: parseFloat(e.target.value)})} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border" />
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Precio (USD/EUR)</label>
+                <input type="number" step="0.01" required value={editingPlan.price} onChange={(e) => setEditingPlan({...editingPlan, price: parseFloat(e.target.value)})} className="block w-full rounded-xl border-gray-300 shadow-xs focus:border-green-500 focus:ring-green-500 text-sm p-2.5 border" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Duración (Meses)</label>
-                <input type="number" required value={editingPlan.duration_months} onChange={(e) => setEditingPlan({...editingPlan, duration_months: parseInt(e.target.value)})} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border" />
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Duración (Meses)</label>
+                <input type="number" required value={editingPlan.duration_months} onChange={(e) => setEditingPlan({...editingPlan, duration_months: parseInt(e.target.value)})} className="block w-full rounded-xl border-gray-300 shadow-xs focus:border-green-500 focus:ring-green-500 text-sm p-2.5 border" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Sesiones Totales</label>
-                <input type="number" required value={editingPlan.total_sessions} onChange={(e) => setEditingPlan({...editingPlan, total_sessions: parseInt(e.target.value)})} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border" />
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Sesiones Totales</label>
+                <input type="number" required value={editingPlan.total_sessions} onChange={(e) => setEditingPlan({...editingPlan, total_sessions: parseInt(e.target.value)})} className="block w-full rounded-xl border-gray-300 shadow-xs focus:border-green-500 focus:ring-green-500 text-sm p-2.5 border" />
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700">Descripción Corta</label>
-              <input type="text" required value={editingPlan.description} onChange={(e) => setEditingPlan({...editingPlan, description: e.target.value})} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border" />
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Descripción Corta</label>
+              <input type="text" required value={editingPlan.description} onChange={(e) => setEditingPlan({...editingPlan, description: e.target.value})} className="block w-full rounded-xl border-gray-300 shadow-xs focus:border-green-500 focus:ring-green-500 text-sm p-2.5 border" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Características (Separadas por comas)</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Características (Separadas por comas)</label>
               <textarea 
                 rows={3} 
                 value={editingPlan.features.join(', ')} 
                 onChange={(e) => setEditingPlan({...editingPlan, features: e.target.value.split(',').map(f => f.trim()).filter(f => f)})} 
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border"
+                className="block w-full rounded-xl border-gray-300 shadow-xs focus:border-green-500 focus:ring-green-500 text-sm p-2.5 border"
                 placeholder="Ej: Plan personalizado, Acceso a WhatsApp, ..."
               />
             </div>
 
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center">
-                <input type="checkbox" checked={editingPlan.is_recommended} onChange={(e) => setEditingPlan({...editingPlan, is_recommended: e.target.checked})} className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 mr-2" />
-                <span className="text-sm font-medium text-gray-700">¿Recomendado / Popular?</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 pt-1">
+              <label className="flex items-center cursor-pointer">
+                <input type="checkbox" checked={editingPlan.is_recommended} onChange={(e) => setEditingPlan({...editingPlan, is_recommended: e.target.checked})} className="rounded border-gray-300 text-green-600 shadow-xs focus:ring-green-500 mr-2" />
+                <span className="text-xs sm:text-sm font-medium text-gray-700">¿Recomendado / Popular?</span>
               </label>
-              <label className="flex items-center">
-                <input type="checkbox" checked={editingPlan.is_active} onChange={(e) => setEditingPlan({...editingPlan, is_active: e.target.checked})} className="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 mr-2" />
-                <span className="text-sm font-medium text-gray-700">Activo (Visible)</span>
+              <label className="flex items-center cursor-pointer">
+                <input type="checkbox" checked={editingPlan.is_active} onChange={(e) => setEditingPlan({...editingPlan, is_active: e.target.checked})} className="rounded border-gray-300 text-green-600 shadow-xs focus:ring-green-500 mr-2" />
+                <span className="text-xs sm:text-sm font-medium text-gray-700">Activo (Visible)</span>
               </label>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
-              <button type="button" onClick={() => setEditingPlan(null)} className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Cancelar</button>
-              <button type="submit" className="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">Guardar Plan</button>
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
+              <button type="button" onClick={() => setEditingPlan(null)} className="px-4 py-2.5 border border-gray-300 shadow-xs text-xs sm:text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 text-center">Cancelar</button>
+              <button type="submit" className="px-5 py-2.5 border border-transparent shadow-xs text-xs sm:text-sm font-bold rounded-xl text-white bg-green-600 hover:bg-green-700 text-center">Guardar Plan</button>
             </div>
           </form>
         </div>

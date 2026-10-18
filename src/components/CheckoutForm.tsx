@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface CheckoutFormProps {
   planId: number;
@@ -30,7 +31,10 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
     clientPhone: '',
     clientIdId: '', // Cédula o RUC
   });
+  const [paymentMethod, setPaymentMethod] = useState<'contado' | 'diferido'>('contado');
+  const [installments, setInstallments] = useState<number>(3);
   const [error, setError] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -106,6 +110,10 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
         throw new Error('Por favor, selecciona fecha/hora y completa tus datos de contacto.');
       }
 
+      if (!acceptedTerms) {
+        throw new Error('Debes aceptar los Términos de Servicio, Políticas de Privacidad y Reembolsos para continuar.');
+      }
+
       // Create date from current state
       const dateToSubmit = new Date(currentDate.getFullYear(), currentDate.getMonth(), selectedDate);
       if (selectedTime) {
@@ -130,6 +138,8 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
           clientIdId: formData.clientIdId,
           firstAppointmentDate,
           appointmentType,
+          paymentType: paymentMethod === 'diferido' ? 'deferred' : 'current',
+          installments: paymentMethod === 'diferido' ? installments : 1,
         }),
       });
 
@@ -186,7 +196,7 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
     const startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
     for (let i = 0; i < startDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-10 w-10"></div>);
+      days.push(<div key={`empty-${i}`} className="h-9 w-9 sm:h-10 sm:w-10"></div>);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -201,7 +211,7 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
           type="button"
           disabled={isPast || isSunday}
           onClick={() => handleDateSelect(day)}
-          className={`h-10 w-10 flex items-center justify-center rounded-full text-sm transition-colors ${
+          className={`h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-xs sm:text-sm transition-colors ${
             isPast || isSunday
               ? "text-gray-300 cursor-not-allowed bg-gray-50/50 pointer-events-none opacity-50"
               : isSelected
@@ -215,49 +225,51 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
     }
 
     return (
-      <div className="w-full">
-        <div className="flex justify-between items-center mb-6 px-2">
-          <button type="button" onClick={handlePrevMonth} disabled={isCurrentMonth} className="p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h3 className="text-lg font-bold text-gray-800 tracking-wide">
-            {currentDate.toLocaleString("es-ES", { month: "long", year: "numeric" }).replace(/^\w/, (c) => c.toUpperCase())}
-          </h3>
-          <button type="button" onClick={handleNextMonth} disabled={isMaxMonth} className="p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
+      <div className="w-full overflow-x-auto">
+        <div className="min-w-[280px]">
+          <div className="flex justify-between items-center mb-6 px-2">
+            <button type="button" onClick={handlePrevMonth} disabled={isCurrentMonth} className="p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 tracking-wide">
+              {currentDate.toLocaleString("es-ES", { month: "long", year: "numeric" }).replace(/^\w/, (c) => c.toUpperCase())}
+            </h3>
+            <button type="button" onClick={handleNextMonth} disabled={isMaxMonth} className="p-2 text-gray-500 hover:text-gray-900 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
 
-        <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-semibold text-gray-500">
-          {daysOfWeek.map((day) => (
-            <div key={day} className="py-2">{day}</div>
-          ))}
-        </div>
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-[11px] sm:text-xs font-semibold text-gray-500">
+            {daysOfWeek.map((day) => (
+              <div key={day} className="py-2">{day}</div>
+            ))}
+          </div>
 
-        <div className="grid grid-cols-7 gap-y-4 gap-x-2 justify-items-center">
-          {days}
+          <div className="grid grid-cols-7 gap-y-3 sm:gap-y-4 gap-x-1 sm:gap-x-2 justify-items-center">
+            {days}
+          </div>
         </div>
       </div>
     );
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <form onSubmit={handleSubmit} className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
       {/* Lado Izquierdo: Calendario y Datos */}
-      <div className="lg:col-span-2 space-y-8">
+      <div className="lg:col-span-2 space-y-6 sm:space-y-8">
         
         {/* Paso 1: Calendario Interactivo */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-6">
-            <span className="bg-[#0052FF] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</span>
-            <h2 className="text-xl font-bold text-gray-800">Agendar 1ra Consulta</h2>
+            <span className="bg-[#0052FF] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">1</span>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">Agendar 1ra Consulta</h2>
           </div>
           
-          <div className="bg-slate-50/50 rounded-2xl p-6 border border-gray-50">
+          <div className="bg-slate-50/50 rounded-2xl p-3 sm:p-6 border border-gray-50 overflow-x-auto">
             {renderCalendar()}
 
             {selectedDate && (
@@ -269,13 +281,13 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                     Verificando disponibilidad...
                   </div>
                 ) : availableSlots.length > 0 ? (
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-2.5 sm:gap-3">
                     {availableSlots.map((time) => (
                       <button
                         key={time}
                         type="button"
                         onClick={() => setSelectedTime(time)}
-                        className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border ${
+                        className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 border ${
                           selectedTime === time
                             ? "border-[#0052FF] bg-blue-50 text-[#0052FF]"
                             : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
@@ -296,51 +308,51 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
         </div>
 
         {/* Card: Modalidad */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="bg-[#0052FF] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</span>
-              <h2 className="text-xl font-bold text-gray-800">Modalidad de Consulta</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setAppointmentType("Virtual")}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  appointmentType === "Virtual"
-                    ? "border-[#0052FF] bg-blue-50"
-                    : "border-gray-100 hover:border-gray-200"
-                }`}
-              >
-                <h3 className="font-bold text-gray-800 mb-1">Cita Virtual</h3>
-                <p className="text-xs text-gray-500">Videollamada</p>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setAppointmentType("Presencial")}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  appointmentType === "Presencial"
-                    ? "border-[#0052FF] bg-blue-50"
-                    : "border-gray-100 hover:border-gray-200"
-                }`}
-              >
-                <h3 className="font-bold text-gray-800 mb-1">Cita Presencial</h3>
-                <p className="text-xs text-gray-500">En consultorio</p>
-              </button>
-            </div>
-          </div>
-
-        {/* Paso 3: Datos de Facturación */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 mb-6">
-            <span className="bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center font-bold">3</span>
-            <h2 className="text-xl font-bold text-gray-800">Datos de Facturación</h2>
+            <span className="bg-[#0052FF] text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">2</span>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">Modalidad de Consulta</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => setAppointmentType("Virtual")}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                appointmentType === "Virtual"
+                  ? "border-[#0052FF] bg-blue-50"
+                  : "border-gray-100 hover:border-gray-200"
+              }`}
+            >
+              <h3 className="font-bold text-gray-800 mb-1 text-sm sm:text-base">Cita Virtual</h3>
+              <p className="text-xs text-gray-500">Videollamada</p>
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => setAppointmentType("Presencial")}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                appointmentType === "Presencial"
+                  ? "border-[#0052FF] bg-blue-50"
+                  : "border-gray-100 hover:border-gray-200"
+              }`}
+            >
+              <h3 className="font-bold text-gray-800 mb-1 text-sm sm:text-base">Cita Presencial</h3>
+              <p className="text-xs text-gray-500">En consultorio</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Paso 3: Datos de Facturación */}
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">3</span>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">Datos de Facturación</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
               <input 
                 type="text" 
                 name="clientName"
@@ -351,11 +363,11 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                 placeholder="Ej. Juan Pérez"
                 value={formData.clientName}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full border border-gray-300 rounded-lg p-2.5 sm:p-3 text-sm sm:text-base text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono / WhatsApp</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Teléfono / WhatsApp</label>
               <input 
                 type="tel" 
                 name="clientPhone"
@@ -366,11 +378,11 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                 placeholder="Ej. +593 99 999 9999"
                 value={formData.clientPhone}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full border border-gray-300 rounded-lg p-2.5 sm:p-3 text-sm sm:text-base text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email</label>
               <input 
                 type="email" 
                 name="clientEmail"
@@ -379,11 +391,11 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                 placeholder="juan@ejemplo.com"
                 value={formData.clientEmail}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full border border-gray-300 rounded-lg p-2.5 sm:p-3 text-sm sm:text-base text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cédula / RUC</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Cédula / RUC</label>
               <input 
                 type="text" 
                 name="clientIdId"
@@ -394,45 +406,134 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                 placeholder="17xxxxxxx"
                 value={formData.clientIdId}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full border border-gray-300 rounded-lg p-2.5 sm:p-3 text-sm sm:text-base text-gray-700 focus:ring-2 focus:ring-blue-500 outline-none"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Paso 4: Método de Pago */}
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="bg-gray-200 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">4</span>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">Método de Pago</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("contado")}
+                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  paymentMethod === "contado"
+                    ? "border-[#0052FF] bg-blue-50/70 shadow-sm"
+                    : "border-gray-100 hover:border-gray-200 bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-bold text-gray-800 text-sm sm:text-base">Pago de Contado</h3>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'contado' ? 'border-[#0052FF]' : 'border-gray-300'}`}>
+                    {paymentMethod === 'contado' && <div className="w-2 h-2 rounded-full bg-[#0052FF]" />}
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">1 solo pago con tarjeta de débito o crédito</p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("diferido")}
+                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                  paymentMethod === "diferido"
+                    ? "border-[#0052FF] bg-blue-50/70 shadow-sm"
+                    : "border-gray-100 hover:border-gray-200 bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-bold text-gray-800 text-sm sm:text-base">Pago Diferido (Tarjeta de Crédito)</h3>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'diferido' ? 'border-[#0052FF]' : 'border-gray-300'}`}>
+                    {paymentMethod === 'diferido' && <div className="w-2 h-2 rounded-full bg-[#0052FF]" />}
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">Paga en cuotas mensuales</p>
+              </button>
+            </div>
+
+            {/* Selector de meses si elige diferido */}
+            {paymentMethod === "diferido" && (
+              <div className="mt-4 p-4 bg-slate-50 border border-blue-100 rounded-xl space-y-3">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800">
+                  Selecciona la cantidad de meses:
+                </label>
+                <div className="grid grid-cols-2 gap-3 max-w-sm">
+                  {[3, 6].map((months) => (
+                    <button
+                      key={months}
+                      type="button"
+                      onClick={() => setInstallments(months)}
+                      className={`py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all text-center ${
+                        installments === months
+                          ? "bg-[#0052FF] text-white border-[#0052FF] shadow-sm"
+                          : "bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span className="block">{months} meses</span>
+                      <span className={`block text-[11px] font-normal mt-0.5 ${installments === months ? 'text-blue-100' : 'text-gray-500'}`}>
+                        (~${(planPrice / months).toFixed(2)}/mes)
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Nota: Los pagos diferidos aplican únicamente para tarjetas de crédito de bancos locales autorizados (Diners, Pichincha, Guayaquil, Pacífico, Produbanco, etc.).
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Lado Derecho: Resumen del Plan */}
       <div className="lg:col-span-1">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Resumen del Plan</h2>
+        <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 lg:sticky lg:top-8">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Resumen del Plan</h2>
           
           <div className="flex justify-between items-start mb-2">
             <div>
-              <h3 className="font-bold text-gray-800">{planName}</h3>
-              <p className="text-sm text-gray-500">{totalSessions} Consulta{totalSessions > 1 ? 's' : ''} + Plan Mensual</p>
+              <h3 className="font-bold text-gray-800 text-sm sm:text-base">{planName}</h3>
+              <p className="text-xs sm:text-sm text-gray-500">{totalSessions} Consulta{totalSessions > 1 ? 's' : ''} + Plan Mensual</p>
             </div>
-            <span className="font-bold text-blue-600 text-lg">${planPrice}</span>
+            <span className="font-bold text-blue-600 text-base sm:text-lg">${planPrice}</span>
           </div>
 
-          <div className="text-sm text-gray-500 mb-2">
+          <div className="text-xs sm:text-sm text-gray-500 mb-2">
             Modalidad: <span className="font-medium text-gray-700">{appointmentType}</span>
           </div>
 
-          <hr className="my-6 border-gray-100" />
+          <div className="text-xs sm:text-sm text-gray-500 mb-2">
+            Método de cobro: <span className="font-medium text-gray-700">{paymentMethod === 'diferido' ? `Diferido (${installments} meses)` : 'Contado (1 pago)'}</span>
+          </div>
+
+          {paymentMethod === 'diferido' && (
+            <div className="text-xs text-blue-700 bg-blue-50 border border-blue-100 px-3 py-2 rounded-lg mb-2 font-medium">
+              Cuota referencial: ~${(planPrice / installments).toFixed(2)} / mes*
+            </div>
+          )}
+
+          <hr className="my-4 sm:my-6 border-gray-100" />
 
           {selectedDate && selectedTime && (
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <div className="space-y-3 sm:space-y-4 mb-6">
+              <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600">
+                <svg className="w-5 h-5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase font-semibold">Fecha Seleccionada</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 uppercase font-semibold">Fecha Seleccionada</p>
                   <p>{selectedDate} {currentDate.toLocaleString("es-ES", { month: "long" })}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-600">
+                <svg className="w-5 h-5 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase font-semibold">Hora</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 uppercase font-semibold">Hora</p>
                   <p>{selectedTime}</p>
                 </div>
               </div>
@@ -440,17 +541,47 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
           )}
 
           <div className="flex justify-between items-center mb-6">
-            <span className="text-lg font-bold text-gray-800">Total</span>
-            <span className="text-2xl font-black text-blue-600">${planPrice.toFixed(2)}</span>
+            <span className="text-base sm:text-lg font-bold text-gray-800">Total</span>
+            <span className="text-xl sm:text-2xl font-black text-blue-600">${planPrice.toFixed(2)}</span>
           </div>
 
-          {error && <div className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg border border-red-100">{error}</div>}
+          {error && <div className="text-red-500 text-xs sm:text-sm mb-4 bg-red-50 p-3 rounded-lg border border-red-100">{error}</div>}
+
+          {/* Checkbox de Consentimiento Legal Obligatorio */}
+          <div className="mb-4 p-3.5 bg-slate-50 border border-gray-200 rounded-xl text-left">
+            <div className="flex items-start gap-2.5">
+              <input
+                type="checkbox"
+                id="checkout-terms"
+                name="acceptedTerms"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                required
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <label htmlFor="checkout-terms" className="text-xs text-gray-700 leading-snug cursor-pointer select-none">
+                He leído y acepto los{" "}
+                <Link href="/legal/terminos" target="_blank" className="text-blue-600 font-semibold underline hover:text-blue-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600 rounded">
+                  Términos de Servicio
+                </Link>
+                , las{" "}
+                <Link href="/legal/privacidad" target="_blank" className="text-blue-600 font-semibold underline hover:text-blue-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600 rounded">
+                  Políticas de Privacidad
+                </Link>{" "}
+                y las{" "}
+                <Link href="/legal/reembolsos" target="_blank" className="text-blue-600 font-semibold underline hover:text-blue-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600 rounded">
+                  Políticas de Cancelación y Reembolso
+                </Link>
+                .
+              </label>
+            </div>
+          </div>
 
           {!payphoneReady ? (
             <button
               type="submit"
-              disabled={loading || !selectedDate || !selectedTime}
-              className={`w-full py-4 rounded-xl font-bold text-white flex justify-center items-center gap-2 transition-all ${(loading || !selectedDate || !selectedTime) ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'}`}
+              disabled={loading || !selectedDate || !selectedTime || !acceptedTerms}
+              className={`w-full py-3.5 sm:py-4 rounded-xl font-bold text-white text-sm sm:text-base flex justify-center items-center gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600 ${(loading || !selectedDate || !selectedTime || !acceptedTerms) ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'}`}
             >
               {loading ? (
                 <>
@@ -459,20 +590,24 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                 </>
               ) : (
                 <>
-                  Continuar al Pago con Payphone
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                  <span>
+                    {paymentMethod === 'diferido' 
+                      ? `Continuar al Pago Diferido (${installments} cuotas)` 
+                      : 'Continuar al Pago con Payphone'}
+                  </span>
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </>
               )}
             </button>
           ) : (
             <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3.5 sm:p-4 text-center">
                 <p className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-1">Paso Final</p>
                 <p className="text-xs text-gray-700">Haz clic en el botón de Payphone a continuación para pagar sin salir de la página:</p>
               </div>
 
               {payphoneConfig?.token || process.env.NEXT_PUBLIC_PAYPHONE_TOKEN ? (
-                <div className="py-2 flex justify-center">
+                <div className="py-2 flex justify-center w-full overflow-x-auto max-w-full">
                   <div id="pp-button" className="w-full flex justify-center min-h-[50px]"></div>
                 </div>
               ) : (

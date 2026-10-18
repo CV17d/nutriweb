@@ -16,6 +16,8 @@ const checkoutSchema = z.object({
   clientIdId: z.string().optional(),
   firstAppointmentDate: z.string().datetime(), // Fecha para la 1ra cita
   appointmentType: z.enum(['Presencial', 'Virtual']).default('Virtual'),
+  paymentType: z.enum(['current', 'deferred']).default('current'),
+  installments: z.number().int().min(1).max(24).default(1),
 });
 
 async function postHandler(request: Request) {
@@ -35,7 +37,20 @@ async function postHandler(request: Request) {
     return NextResponse.json({ success: false, errors: parsed.error.format() }, { status: 400 });
   }
 
-  const { planId, clientName, clientEmail, clientPhone, clientIdId, firstAppointmentDate, appointmentType } = parsed.data;
+  const { 
+    planId, 
+    clientName, 
+    clientEmail, 
+    clientPhone, 
+    clientIdId, 
+    firstAppointmentDate, 
+    appointmentType,
+    paymentType,
+    installments,
+  } = parsed.data;
+
+  const effectiveInstallments = paymentType === 'deferred' && installments > 1 ? installments : 1;
+  const isDeferred = paymentType === 'deferred' || effectiveInstallments > 1;
   
   let clientId: string = parsed.data.clientId || '';
   
@@ -65,7 +80,7 @@ async function postHandler(request: Request) {
   const planPriceNumber = parseFloat(plan.price);
   const amountInCents = Math.round(planPriceNumber * 100);
 
-  // Metadata completa de la cita y el cliente para asociar a la transacción
+  // Metadata completa de la cita, el cliente y cuotas para asociar a la transacción
   const metadata = {
     clientId,
     clientName,
@@ -76,15 +91,29 @@ async function postHandler(request: Request) {
     appointmentType,
     planName: plan.name,
     totalSessions: plan.total_sessions || 1,
+    installments: effectiveInstallments,
+    paymentType: isDeferred ? 'deferred' : 'current',
   };
 
-  // Crear la transacción con estado pending y sus metadatos
-  const transactionId = await createTransaction(clientId, planId, planPriceNumber, metadata);
+  // Crear la transacción con estado pending, metadatos y cuotas
+  const transactionId = await createTransaction(
+    clientId, 
+    planId, 
+    planPriceNumber, 
+    metadata, 
+    effectiveInstallments
+  );
 
-  logger.info({ message: 'Transacción creada para Payphone', transactionId, planName: plan.name });
+  logger.info({ 
+    message: 'Transacción creada para Payphone', 
+    transactionId, 
+    planName: plan.name,
+    isDeferred,
+    installments: effectiveInstallments 
+  });
 
   // Preparar la carga útil de la transacción de Payphone (sin exponer secretos del servidor)
-  const payphoneConfig = {
+  const payphoneConfig: any = {
     clientTransactionId: transactionId,
     amount: amountInCents,
     amountWithoutTax: amountInCents,
@@ -94,7 +123,7 @@ async function postHandler(request: Request) {
     tip: 0,
     currency: 'USD',
     storeId: process.env.PAYPHONE_STORE_ID || '',
-    reference: `Plan ${plan.name} - ${clientName}`.slice(0, 100),
+    reference: `Plan ${plan.name} - ${clientName}${isDeferred ? ` (${effectiveInstallments} cuotas)` : ''}`.slice(0, 100),
     phoneNumber: clientPhone || '',
     email: clientEmail,
     documentId: clientIdId || '',
@@ -103,6 +132,21 @@ async function postHandler(request: Request) {
     defaultMethod: 'card',
     timeZone: -5,
   };
+
+  // Inyección de parámetros de pago diferido para la API v3 y Cajita de Payphone
+  if (isDeferred) {
+    payphoneConfig.deferred = true;
+    payphoneConfig.deferredMonths = effectiveInstallments;
+    payphoneConfig.deferredType = 1; // 1: Estándar bancario / con intereses
+    payphoneConfig.deferredConfiguration = {
+      months: effectiveInstallments,
+      type: 'with-interest',
+    };
+    payphoneConfig.deferredOptions = {
+      months: effectiveInstallments,
+      type: 1,
+    };
+  }
 
   return NextResponse.json({
     success: true,
