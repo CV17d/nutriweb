@@ -131,6 +131,8 @@ async function postHandler(request: Request) {
     lang: 'es',
     defaultMethod: 'card',
     timeZone: -5,
+    responseUrl: `${process.env.NEXTAUTH_URL || 'https://www.andresburbanonutricionista.com'}/api/checkout/callback`,
+    cancellationUrl: `${process.env.NEXTAUTH_URL || 'https://www.andresburbanonutricionista.com'}/checkout/error`,
   };
 
   // Inyección de parámetros de pago diferido para la API v3 y Cajita de Payphone
