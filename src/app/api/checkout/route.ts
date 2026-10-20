@@ -77,10 +77,12 @@ async function postHandler(request: Request) {
   const planPriceNumber = parseFloat(plan.price);
   const amountInCents = Math.round(planPriceNumber * 100);
 
-  // El plan Básico (o planes de 1 mes) no admiten diferido
-  const isBasic = plan.name?.toLowerCase().includes('básico') || plan.name?.toLowerCase().includes('basico') || Number(plan.duration_months) <= 1;
-  const effectiveInstallments = !isBasic && paymentType === 'deferred' && installments > 1 && installments <= 3 ? installments : 1;
-  const isDeferred = !isBasic && (paymentType === 'deferred' || effectiveInstallments > 1);
+  // Lógica dinámica para cualquier plan según duración y precio
+  const planDuration = Number(plan.duration_months) || 1;
+  const isSingleMonth = planDuration <= 1 || plan.name?.toLowerCase().includes('básico') || plan.name?.toLowerCase().includes('basico') || planPriceNumber <= 75;
+  const maxAllowedInstallments = Math.min(Math.max(planDuration, 1), 3);
+  const effectiveInstallments = !isSingleMonth && paymentType === 'deferred' && installments > 1 && installments <= maxAllowedInstallments ? installments : 1;
+  const isDeferred = !isSingleMonth && (paymentType === 'deferred' || effectiveInstallments > 1);
 
   // Metadata completa de la cita, el cliente y cuotas para asociar a la transacción
   const metadata = {

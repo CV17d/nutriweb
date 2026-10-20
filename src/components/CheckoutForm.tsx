@@ -20,12 +20,14 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
   const [payphoneConfig, setPayphoneConfig] = useState<any>(null);
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
   const isNoInterestEligible = planPrice >= 200;
-  const isBasicPlan = 
+  const isSingleMonthPlan = 
     (durationMonths !== undefined && durationMonths <= 1) || 
     planName.toLowerCase().includes('básico') || 
     planName.toLowerCase().includes('basico') ||
     planPrice <= 75;
-  const allowsDeferred = !isBasicPlan;
+  const allowsDeferred = !isSingleMonthPlan;
+  const maxInstallments = Math.min(Math.max(durationMonths || 3, 1), 3);
+  const availableInstallments = Array.from({ length: maxInstallments }, (_, i) => i + 1);
   
   // Calendar state
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -501,8 +503,8 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2.5 sm:gap-3 max-w-sm">
-                  {[1, 2, 3].map((months) => (
+                <div className={`grid gap-2.5 sm:gap-3 max-w-sm ${availableInstallments.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                  {availableInstallments.map((months) => (
                     <button
                       key={months}
                       type="button"
