@@ -2,7 +2,25 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import BankModal from './BankModal';
+
+function getDeferredBadgeText(plan: any) {
+  const name = (plan.name || '').toLowerCase();
+  const price = Number(plan.price);
+
+  // Card "Básico" ($70.00): No agregar badge
+  if (name.includes('básico') || name.includes('basico') || price <= 75 || (plan.duration_months && plan.duration_months <= 1)) {
+    return null;
+  }
+
+  // Card "Performance" ($360.00) y "Elite" ($720.00) o consumos desde $200 USD
+  if (price >= 200) {
+    const installment = (price / 3).toFixed(2);
+    return `3 cuotas sin intereses de $${installment}`;
+  }
+
+  // Card "Esencial" ($180.00)
+  return 'Diferido disponible con intereses';
+}
 
 function PricingCard({ plan }: { plan: any }) {
   const [expanded, setExpanded] = useState(false);
@@ -11,6 +29,13 @@ function PricingCard({ plan }: { plan: any }) {
   // Si es un plan destacado
   const isRecommended = plan.is_recommended;
   const isElite = plan.name === 'Elite';
+  const badgeText = getDeferredBadgeText(plan);
+
+  const badgeStyle = isRecommended
+    ? 'bg-white/90 text-slate-900 font-medium'
+    : isElite
+      ? 'bg-blue-50/70 text-slate-800 font-medium'
+      : 'bg-blue-50/70 text-slate-700 font-medium';
   
   return (
     <div className={`w-full rounded-3xl p-5 xl:p-7 flex flex-col transition-all duration-300 relative h-full
@@ -62,7 +87,7 @@ function PricingCard({ plan }: { plan: any }) {
             type="button"
             onClick={() => setExpanded(!expanded)}
             aria-expanded={expanded}
-            className={`text-xs font-bold transition-colors mb-6 flex items-center gap-1 mt-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-electric rounded
+            className={`text-xs font-bold transition-colors mb-4 flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-electric rounded
             ${isRecommended ? 'text-brand-electric hover:text-white' : 'text-brand-electric hover:text-brand-navy'}
             `}
           >
@@ -72,33 +97,34 @@ function PricingCard({ plan }: { plan: any }) {
         )}
       </div>
       
-      <Link 
-        href={`/checkout/${plan.id}`} 
-        aria-label={`Comprar plan ${plan.name} por $${plan.price}`}
-        className={`w-full inline-block text-center rounded-full py-3.5 font-bold text-xs uppercase tracking-wider transition-colors mt-auto shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-electric
-          ${isRecommended 
-            ? 'bg-brand-electric text-brand-white shadow-lg hover:opacity-90' 
-            : (isElite 
-                ? 'border-2 border-brand-navy text-brand-navy hover:bg-brand-navy/5' 
-                : 'border-2 border-brand-electric text-brand-electric hover:bg-brand-electric/5'
-              )
-          }
-        `}
-      >
-        Comprar Plan
-      </Link>
+      <div className="mt-auto pt-4 flex flex-col w-full">
+        {badgeText && (
+          <div className={`w-full py-1.5 px-3 rounded-full text-xs text-center mb-3 ${badgeStyle}`}>
+            {badgeText}
+          </div>
+        )}
+
+        <Link 
+          href={`/checkout/${plan.id}`} 
+          aria-label={`Comprar plan ${plan.name} por $${plan.price}`}
+          className={`w-full inline-block text-center rounded-full py-3.5 font-bold text-xs uppercase tracking-wider transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-electric
+            ${isRecommended 
+              ? 'bg-brand-electric text-brand-white shadow-lg hover:opacity-90' 
+              : (isElite 
+                  ? 'border-2 border-brand-navy text-brand-navy hover:bg-brand-navy/5' 
+                  : 'border-2 border-brand-electric text-brand-electric hover:bg-brand-electric/5'
+                )
+            }
+          `}
+        >
+          Comprar Plan
+        </Link>
+      </div>
     </div>
   );
 }
 
 export default function Pricing({ plans = [] }: { plans?: any[] }) {
-  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
-  const [bankModalTab, setBankModalTab] = useState<'no-interest' | 'with-interest'>('no-interest');
-
-  const handleOpenBanks = (tab: 'no-interest' | 'with-interest') => {
-    setBankModalTab(tab);
-    setIsBankModalOpen(true);
-  };
   // En caso de que no haya planes cargados de BD, renderizamos algo básico o vacío
   if (!plans || plans.length === 0) {
     return null;
@@ -130,45 +156,6 @@ export default function Pricing({ plans = [] }: { plans?: any[] }) {
           <PricingCard key={plan.id} plan={plan} />
         ))}
       </div>
-
-      {/* Bloque Informativo de Pagos Diferidos */}
-      <div className="mt-10 sm:mt-14 bg-white border border-gray-200 rounded-3xl p-5 sm:p-7 max-w-4xl mx-auto shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-blue-50 text-brand-electric">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-              </span>
-              <h3 className="font-extrabold text-sm sm:text-base text-brand-navy">
-                Opciones de Diferido con Tarjeta de Crédito (Payphone)
-              </h3>
-            </div>
-            <p className="text-xs sm:text-sm text-gray-600 max-w-2xl leading-relaxed">
-              • <strong>Planes desde $200 USD:</strong> Puedes diferir hasta en 3 cuotas <strong>sin intereses</strong> con tarjetas participantes (Pichincha, Diners, BGR, Interdin, etc.).<br />
-              • <strong>Planes de 3 meses menores a $200 USD:</strong> Opción diferida disponible hasta en 3 cuotas <strong>con intereses</strong> según las condiciones de tu banco emisor.<br />
-              • <em>El Plan Básico (1 mes) aplica exclusivamente a pago de contado.</em>
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleOpenBanks('no-interest')}
-            className="shrink-0 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-brand-navy rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 border border-gray-200 w-full sm:w-auto justify-center"
-          >
-            <svg className="w-4 h-4 text-brand-electric" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            Ver Bancos Aceptados
-          </button>
-        </div>
-      </div>
-
-      <BankModal
-        isOpen={isBankModalOpen}
-        onClose={() => setIsBankModalOpen(false)}
-        defaultTab={bankModalTab}
-      />
     </section>
   );
 }
