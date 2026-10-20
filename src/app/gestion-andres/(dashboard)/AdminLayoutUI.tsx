@@ -58,6 +58,7 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
               <Link 
                 key={link.name} 
                 href={link.href}
+                prefetch={false}
                 onClick={() => setIsSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-DEFAULT transition-colors font-medium ${
                   isActive 

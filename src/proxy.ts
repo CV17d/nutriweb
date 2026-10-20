@@ -14,11 +14,8 @@ export default async function proxy(request: NextRequest) {
 
   // Protect /gestion-andres routes (except /gestion-andres/login)
   if (pathname.startsWith('/gestion-andres') && !pathname.startsWith('/gestion-andres/login')) {
-    const verified = await verifySession(sessionValue);
-    
-    if (!verified || verified.role !== 'admin') {
-      const redirectRes = NextResponse.redirect(new URL('/gestion-andres/login?reason=expired', request.url));
-      return redirectRes;
+    if (!sessionValue) {
+      return NextResponse.redirect(new URL('/gestion-andres/login', request.url));
     }
   }
 
