@@ -137,16 +137,18 @@ async function postHandler(request: Request) {
 
   // Inyección de parámetros de pago diferido para la API v3 y Cajita de Payphone
   if (isDeferred) {
+    const isNoInterestEligible = planPriceNumber >= 200;
     payphoneConfig.deferred = true;
     payphoneConfig.deferredMonths = effectiveInstallments;
-    payphoneConfig.deferredType = 1; // 1: Estándar bancario / con intereses
+    // Payphone: tipo 2 = sin intereses (mínimo $200), tipo 1 = con intereses
+    payphoneConfig.deferredType = isNoInterestEligible ? 2 : 1;
     payphoneConfig.deferredConfiguration = {
       months: effectiveInstallments,
-      type: 'with-interest',
+      type: isNoInterestEligible ? 'without-interest' : 'with-interest',
     };
     payphoneConfig.deferredOptions = {
       months: effectiveInstallments,
-      type: 1,
+      type: isNoInterestEligible ? 2 : 1,
     };
   }
 
