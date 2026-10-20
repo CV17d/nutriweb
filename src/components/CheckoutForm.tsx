@@ -480,19 +480,19 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 max-w-sm">
-                  {[3, 6].map((months) => (
+                <div className="grid grid-cols-3 gap-2.5 sm:gap-3 max-w-sm">
+                  {[1, 2, 3].map((months) => (
                     <button
                       key={months}
                       type="button"
                       onClick={() => setInstallments(months)}
-                      className={`py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all text-center ${
+                      className={`py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border transition-all text-center ${
                         installments === months
                           ? "bg-[#0052FF] text-white border-[#0052FF] shadow-sm"
                           : "bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                       }`}
                     >
-                      <span className="block">{months} meses</span>
+                      <span className="block">{months} {months === 1 ? 'cuota' : 'cuotas'}</span>
                       <span className={`block text-[11px] font-normal mt-0.5 ${installments === months ? 'text-blue-100' : 'text-gray-500'}`}>
                         (~${(planPrice / months).toFixed(2)}/mes)
                       </span>
@@ -508,7 +508,7 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                       <span>Diferido SIN INTERESES disponible (Monto ≥ $200 USD)</span>
                     </div>
                     <p className="text-emerald-800 leading-relaxed">
-                      Este plan aplica a <strong>3 meses</strong> (monto mínimo $200) y <strong>6 meses</strong> (monto mínimo $250) <strong>sin intereses</strong> con tarjetas de crédito de bancos locales participantes (Pichincha, Diners Club, BGR, Interdin, etc.).
+                      Este plan aplica a diferido de <strong>hasta 3 cuotas sin intereses</strong> con tarjetas de crédito de bancos locales participantes (Pichincha, Diners Club, BGR, Interdin, etc.).
                     </p>
                     <p className="text-[11px] text-emerald-700">
                       *Si tu tarjeta pertenece a una entidad no convenida para tasa 0%, el diferido se procesará con las condiciones de tu banco emisor.
@@ -551,7 +551,7 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
           <div className="text-xs sm:text-sm text-gray-500 mb-2">
             Método de cobro: <span className="font-medium text-gray-700">
               {paymentMethod === 'diferido' 
-                ? `Diferido (${installments} meses - ${isNoInterestEligible ? 'Sin intereses*' : 'Con intereses*'})` 
+                ? `Diferido (${installments} ${installments === 1 ? 'cuota' : 'cuotas'} - ${isNoInterestEligible ? 'Sin intereses*' : 'Con intereses*'})` 
                 : 'Contado (1 pago)'}
             </span>
           </div>

@@ -110,11 +110,11 @@ export default function BankModal({ isOpen, onClose, defaultTab = 'no-interest' 
         <div className="px-5 py-3 text-xs leading-relaxed bg-slate-50 border-b border-gray-100">
           {activeTab === 'no-interest' ? (
             <div className="text-emerald-900 bg-emerald-50 border border-emerald-200/80 p-2.5 rounded-xl">
-              <strong>Plazos sin recargo:</strong> 3 meses (desde $200 USD) y 6 meses (desde $250 USD). Disponible en los planes <em>Performance</em> y <em>Elite</em>.
+              <strong>Plazos sin recargo:</strong> Hasta 3 cuotas (desde $200 USD). Disponible en los planes <em>Performance</em> y <em>Elite</em>.
             </div>
           ) : (
             <div className="text-blue-900 bg-blue-50 border border-blue-200/80 p-2.5 rounded-xl">
-              <strong>Plazos con intereses:</strong> 3 y 6 meses. Aplica para planes menores a $200 (como <em>Básico</em> y <em>Esencial</em>). La tasa de interés depende del contrato con tu banco emisor.
+              <strong>Plazos con intereses:</strong> Hasta 3 cuotas. Aplica para planes menores a $200 (como <em>Básico</em> y <em>Esencial</em>). La tasa de interés depende del contrato con tu banco emisor.
             </div>
           )}
         </div>

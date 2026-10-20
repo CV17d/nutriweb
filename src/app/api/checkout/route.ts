@@ -17,7 +17,7 @@ const checkoutSchema = z.object({
   firstAppointmentDate: z.string().datetime(), // Fecha para la 1ra cita
   appointmentType: z.enum(['Presencial', 'Virtual']).default('Virtual'),
   paymentType: z.enum(['current', 'deferred']).default('current'),
-  installments: z.number().int().min(1).max(24).default(1),
+  installments: z.number().int().min(1).max(3).default(1),
 });
 
 async function postHandler(request: Request) {

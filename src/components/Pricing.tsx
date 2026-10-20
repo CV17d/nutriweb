@@ -4,15 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 import BankModal from './BankModal';
 
-function PricingCard({ plan, onOpenBanks }: { plan: any; onOpenBanks: (tab: 'no-interest' | 'with-interest') => void }) {
+function PricingCard({ plan }: { plan: any }) {
   const [expanded, setExpanded] = useState(false);
   const features = plan.features || [];
   
   // Si es un plan destacado
   const isRecommended = plan.is_recommended;
   const isElite = plan.name === 'Elite';
-  const priceNum = parseFloat(plan.price) || 0;
-  const isNoInterest = priceNum >= 200;
   
   return (
     <div className={`w-full rounded-3xl p-5 xl:p-7 flex flex-col transition-all duration-300 relative h-full
@@ -31,48 +29,13 @@ function PricingCard({ plan, onOpenBanks }: { plan: any; onOpenBanks: (tab: 'no-
         <h3 className={`text-xl font-bold mb-2 ${isRecommended ? 'text-brand-white' : 'text-brand-navy'}`}>
           {plan.name}
         </h3>
-        <div className="flex items-end gap-1 mb-2 flex-wrap">
+        <div className="flex items-end gap-1 mb-4 flex-wrap">
           <span className={`text-3xl xl:text-4xl font-black ${isRecommended ? 'text-brand-white' : 'text-brand-navy'}`}>
             ${plan.price}
           </span>
           <span className={`text-xs xl:text-sm font-semibold mb-1.5 ${isRecommended ? 'text-gray-400' : 'text-brand-navy/60'}`}>
             / {plan.duration_months} mes{plan.duration_months > 1 ? 'es' : ''}
           </span>
-        </div>
-
-        {/* Badge de diferido condicional */}
-        <div className="mb-4">
-          {isNoInterest ? (
-            <button
-              type="button"
-              onClick={() => onOpenBanks('no-interest')}
-              className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-lg transition-colors text-left ${
-                isRecommended 
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 hover:bg-emerald-500/30' 
-                  : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
-              }`}
-              title="Haz clic para ver los bancos participantes sin intereses"
-            >
-              <span>⚡</span>
-              <span>Hasta 3 y 6 meses <strong>sin intereses</strong></span>
-              <svg className="w-3 h-3 opacity-70 ml-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => onOpenBanks('with-interest')}
-              className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg transition-colors text-left ${
-                isRecommended 
-                  ? 'bg-white/10 text-gray-300 border border-white/15 hover:bg-white/15' 
-                  : 'bg-slate-50 text-gray-600 border border-gray-200 hover:bg-slate-100'
-              }`}
-              title="Haz clic para ver los bancos participantes con intereses"
-            >
-              <span>💳</span>
-              <span>Diferido disponible (con intereses)</span>
-              <svg className="w-3 h-3 opacity-70 ml-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </button>
-          )}
         </div>
         <p className={`text-xs xl:text-sm mb-4 min-h-[50px] leading-relaxed ${isRecommended ? 'text-gray-300' : 'text-brand-navy/70'}`} dangerouslySetInnerHTML={{ __html: plan.description }} />
         
@@ -164,7 +127,7 @@ export default function Pricing({ plans = [] }: { plans?: any[] }) {
       {/* Lista Vertical en Móvil / Grid de Precios en escritorio */}
       <div className={`flex flex-col md:grid ${getGridColsClass()} gap-6 lg:gap-4 xl:gap-6 items-stretch w-full`}>
         {plans.map((plan) => (
-          <PricingCard key={plan.id} plan={plan} onOpenBanks={handleOpenBanks} />
+          <PricingCard key={plan.id} plan={plan} />
         ))}
       </div>
 
@@ -183,8 +146,8 @@ export default function Pricing({ plans = [] }: { plans?: any[] }) {
               </h3>
             </div>
             <p className="text-xs sm:text-sm text-gray-600 max-w-2xl leading-relaxed">
-              • <strong>Planes desde $200 USD:</strong> Puedes diferir a 3 y 6 meses <strong>sin intereses</strong> con tarjetas participantes (Pichincha, Diners, BGR, etc.).<br />
-              • <strong>Planes menores a $200 USD:</strong> Opción diferida disponible <strong>con intereses</strong> según las condiciones de tu banco emisor.
+              • <strong>Planes desde $200 USD:</strong> Puedes diferir hasta en 3 cuotas <strong>sin intereses</strong> con tarjetas participantes (Pichincha, Diners, BGR, Interdin, etc.).<br />
+              • <strong>Planes menores a $200 USD:</strong> Opción diferida disponible hasta en 3 cuotas <strong>con intereses</strong> según las condiciones de tu banco emisor.
             </p>
           </div>
           <button
