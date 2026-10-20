@@ -8,7 +8,9 @@ export default function Testimonials({ cases = [] }: { cases?: any[] }) {
     name: c.patient_name,
     role: c.metrics || "PACIENTE",
     initials: c.patient_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
-    image_url: c.image_url,
+    image_url: c.image_url || c.after_image_url || c.before_image_url,
+    before_image_url: c.before_image_url,
+    after_image_url: c.after_image_url,
     rating: c.rating ?? 5
   })) : [
     {
@@ -39,6 +41,7 @@ export default function Testimonials({ cases = [] }: { cases?: any[] }) {
 
   const carouselRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
 
   const scroll = (direction: 'left' | 'right') => {
     if (!carouselRef.current) return;
@@ -141,9 +144,54 @@ export default function Testimonials({ cases = [] }: { cases?: any[] }) {
                 </div>
 
                 {/* Cita */}
-                <p className="text-sm text-brand-navy/80 italic leading-relaxed mb-8">
+                <p className="text-sm text-brand-navy/80 italic leading-relaxed mb-6">
                   {testimonial.quote}
                 </p>
+
+                {/* Fotos de Transformación (Antes y Después) */}
+                {((testimonial as any).before_image_url || (testimonial as any).after_image_url) && (
+                  <div className="mb-6 rounded-2xl bg-slate-50/90 border border-gray-100 p-2.5 sm:p-3">
+                    <div className="text-[10px] font-bold text-brand-navy/60 uppercase tracking-widest mb-2 text-center">
+                      Transformación del Paciente
+                    </div>
+                    <div className={`grid ${(testimonial as any).before_image_url && (testimonial as any).after_image_url ? 'grid-cols-2' : 'grid-cols-1'} gap-2 sm:gap-2.5`}>
+                      {(testimonial as any).before_image_url && (
+                        <div
+                          className="relative rounded-xl overflow-hidden aspect-[4/5] bg-gray-100 border border-gray-200/80 shadow-2xs group cursor-pointer"
+                          onClick={() => setPreviewImage({ url: (testimonial as any).before_image_url, title: `Antes - ${testimonial.name}` })}
+                          title="Clic para ampliar foto"
+                        >
+                          <img
+                            src={(testimonial as any).before_image_url}
+                            alt={`Foto del antes de ${testimonial.name}`}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <span className="absolute bottom-1.5 left-1.5 bg-brand-navy/85 backdrop-blur-xs text-white text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-xs">
+                            Antes
+                          </span>
+                        </div>
+                      )}
+                      {(testimonial as any).after_image_url && (
+                        <div
+                          className="relative rounded-xl overflow-hidden aspect-[4/5] bg-gray-100 border border-gray-200/80 shadow-2xs group cursor-pointer"
+                          onClick={() => setPreviewImage({ url: (testimonial as any).after_image_url, title: `Después - ${testimonial.name}` })}
+                          title="Clic para ampliar foto"
+                        >
+                          <img
+                            src={(testimonial as any).after_image_url}
+                            alt={`Foto del después de ${testimonial.name}`}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <span className="absolute bottom-1.5 left-1.5 bg-brand-electric/90 backdrop-blur-xs text-white text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-xs">
+                            Después
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Autor */}
@@ -189,6 +237,37 @@ export default function Testimonials({ cases = [] }: { cases?: any[] }) {
           />
         ))}
       </div>
+
+      {/* Modal de Imagen Ampliada */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div
+            className="relative max-w-lg w-full bg-white rounded-3xl overflow-hidden shadow-2xl p-3 flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex items-center justify-between pb-2 px-2 border-b border-gray-100">
+              <span className="text-xs font-bold text-brand-navy tracking-tight">{previewImage.title}</span>
+              <button
+                onClick={() => setPreviewImage(null)}
+                className="w-7 h-7 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center text-sm font-bold transition-colors"
+                aria-label="Cerrar modal"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="w-full max-h-[75vh] overflow-hidden rounded-2xl mt-2 bg-black/5 flex items-center justify-center">
+              <img
+                src={previewImage.url}
+                alt={previewImage.title}
+                className="max-h-[75vh] w-auto object-contain rounded-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

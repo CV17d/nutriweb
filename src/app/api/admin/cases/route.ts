@@ -10,6 +10,8 @@ const createCaseSchema = z.object({
   comment: z.string().trim().min(5).max(2000),
   metrics: z.string().trim().max(255).optional().default(''),
   image_url: z.string().trim().max(1000).optional().default(''),
+  before_image_url: z.string().trim().max(1000).optional().default(''),
+  after_image_url: z.string().trim().max(1000).optional().default(''),
   rating: z.number().int().min(1).max(5).optional().default(5),
 });
 
@@ -19,6 +21,8 @@ const updateCaseSchema = z.object({
   comment: z.string().trim().min(5).max(2000),
   metrics: z.string().trim().max(255).optional().default(''),
   image_url: z.string().trim().max(1000).optional().default(''),
+  before_image_url: z.string().trim().max(1000).optional().default(''),
+  after_image_url: z.string().trim().max(1000).optional().default(''),
   rating: z.number().int().min(1).max(5).optional().default(5),
 });
 
@@ -45,11 +49,11 @@ async function postHandler(request: Request) {
     return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.format() }, { status: 400 });
   }
 
-  const { patient_name, comment, metrics, image_url, rating } = parsed.data;
+  const { patient_name, comment, metrics, image_url, before_image_url, after_image_url, rating } = parsed.data;
 
   const result = await query(
-    'INSERT INTO success_cases (patient_name, comment, metrics, image_url, rating) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-    [patient_name, comment, metrics, image_url, rating]
+    'INSERT INTO success_cases (patient_name, comment, metrics, image_url, rating, before_image_url, after_image_url) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [patient_name, comment, metrics, image_url, rating, before_image_url, after_image_url]
   );
 
   revalidatePath('/');
@@ -69,11 +73,11 @@ async function putHandler(request: Request) {
     return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.format() }, { status: 400 });
   }
 
-  const { id, patient_name, comment, metrics, image_url, rating } = parsed.data;
+  const { id, patient_name, comment, metrics, image_url, before_image_url, after_image_url, rating } = parsed.data;
 
   const result = await query(
-    'UPDATE success_cases SET patient_name = $1, comment = $2, metrics = $3, image_url = $4, rating = $5 WHERE id = $6 RETURNING *',
-    [patient_name, comment, metrics, image_url, rating, id]
+    'UPDATE success_cases SET patient_name = $1, comment = $2, metrics = $3, image_url = $4, rating = $5, before_image_url = $6, after_image_url = $7 WHERE id = $8 RETURNING *',
+    [patient_name, comment, metrics, image_url, rating, before_image_url, after_image_url, id]
   );
 
   if (result.rowCount === 0) {
