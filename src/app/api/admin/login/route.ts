@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createSession } from '../../../../lib/auth';
+import { createSession, COOKIE_NAME, COOKIE_OPTIONS, ABSOLUTE_TIMEOUT_MS } from '../../../../lib/auth';
 import { checkRateLimit, getClientIp } from '../../../../lib/rate-limit';
 import { withErrorHandler } from '../../../../lib/api-handler';
 import { logSecurityEvent } from '../../../../lib/security-logger';
@@ -92,12 +92,9 @@ async function loginHandler(request: Request) {
   });
 
   const response = NextResponse.json({ success: true });
-  response.cookies.set('admin_session', sessionToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 8 * 60 * 60,
+  response.cookies.set(COOKIE_NAME, sessionToken, {
+    ...COOKIE_OPTIONS,
+    expires: new Date(Date.now() + ABSOLUTE_TIMEOUT_MS),
   });
 
   return response;

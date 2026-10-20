@@ -10,7 +10,7 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // Monitor de inactividad de 2 horas e interceptor de 401 en el cliente
+  // Monitor de inactividad de 2 horas en el cliente
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     const INACTIVITY_LIMIT_MS = 2 * 60 * 60 * 1000; // 2 horas (consistente con el backend)
@@ -26,26 +26,9 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
     activityEvents.forEach((ev) => window.addEventListener(ev, resetTimer));
     resetTimer();
 
-    // Interceptar fetch solo en endpoints administrativos para detectar 401
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const response = await originalFetch(...args);
-      const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || '';
-      if (
-        response.status === 401 &&
-        url.includes('/api/admin') &&
-        !url.includes('/api/admin/login') &&
-        !window.location.pathname.startsWith('/gestion-andres/login')
-      ) {
-        window.location.href = '/gestion-andres/login?reason=expired';
-      }
-      return response;
-    };
-
     return () => {
       clearTimeout(timeoutId);
       activityEvents.forEach((ev) => window.removeEventListener(ev, resetTimer));
-      window.fetch = originalFetch;
     };
   }, []);
 

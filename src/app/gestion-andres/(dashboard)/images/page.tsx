@@ -47,8 +47,8 @@ export default function ImagesPage() {
   const fetchData = async () => {
     try {
       const [settingsRes, photosRes] = await Promise.all([
-        fetch('/api/admin/settings'),
-        fetch('/api/admin/clinic-photos')
+        fetch('/api/admin/settings', { credentials: 'include' }),
+        fetch('/api/admin/clinic-photos', { credentials: 'include' })
       ]);
 
       if (settingsRes.ok) {
@@ -87,6 +87,7 @@ export default function ImagesPage() {
       
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
       
@@ -102,6 +103,7 @@ export default function ImagesPage() {
       
       const saveRes = await fetch('/api/admin/settings', {
         method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, value: updatedValue }),
       });
@@ -147,6 +149,7 @@ export default function ImagesPage() {
 
         const uploadRes = await fetch('/api/admin/upload', {
           method: 'POST',
+          credentials: 'include',
           body: formData,
         });
 
@@ -168,6 +171,7 @@ export default function ImagesPage() {
       // Guardar registro en la tabla clinic_photos
       const res = await fetch('/api/admin/clinic-photos', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           image_url: finalImageUrl,
@@ -206,6 +210,7 @@ export default function ImagesPage() {
     try {
       const res = await fetch(`/api/admin/clinic-photos?id=${deletingPhotoId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!res.ok) {
@@ -230,6 +235,7 @@ export default function ImagesPage() {
     try {
       const res = await fetch('/api/admin/clinic-photos', {
         method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id,
@@ -274,11 +280,13 @@ export default function ImagesPage() {
       await Promise.all([
         fetch('/api/admin/clinic-photos', {
           method: 'PUT',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: photo.id, display_order: targetOrder }),
         }),
         fetch('/api/admin/clinic-photos', {
           method: 'PUT',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: targetPhoto.id, display_order: currentOrder }),
         }),
@@ -296,6 +304,7 @@ export default function ImagesPage() {
     try {
       const res = await fetch('/api/admin/clinic-photos', {
         method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: photo.id,

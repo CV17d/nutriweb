@@ -22,21 +22,9 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  // Protect /api/admin routes (except /api/admin/login)
-  if (pathname.startsWith('/api/admin') && !pathname.startsWith('/api/admin/login')) {
-    const verified = await verifySession(sessionValue);
-    
-    if (!verified || verified.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'Sesión caducada por inactividad o inválida' },
-        { status: 401 }
-      );
-    }
-  }
-
   // Deslizamiento de sesión (Sliding Session): refrescar si la sesión es válida y pasaron > 5 min de actividad
   let refreshedToken: string | null = null;
-  if (sessionValue && (pathname.startsWith('/gestion-andres') || pathname.startsWith('/api/admin'))) {
+  if (sessionValue && pathname.startsWith('/gestion-andres')) {
     const verified = await verifySession(sessionValue);
     if (verified && Date.now() - verified.lastActive > 5 * 60 * 1000) {
       try {
@@ -80,6 +68,6 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Se ejecuta el proxy en las rutas del panel, api administrativa y captura de la antigua ruta admin
-  matcher: ['/admin', '/admin/:path*', '/gestion-andres', '/gestion-andres/:path*', '/api/admin/:path*'],
+  // Se ejecuta el proxy en las rutas del panel y captura de la antigua ruta admin
+  matcher: ['/admin', '/admin/:path*', '/gestion-andres', '/gestion-andres/:path*'],
 };

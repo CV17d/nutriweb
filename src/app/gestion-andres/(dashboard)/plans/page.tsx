@@ -21,7 +21,9 @@ export default function PlansPage() {
 
   const fetchPlans = async () => {
     try {
-      const res = await fetch('/api/admin/plans');
+      const res = await fetch('/api/admin/plans', {
+        credentials: 'include',
+      });
       const data = await res.json();
       setPlans(data);
     } catch (error) {
@@ -43,6 +45,7 @@ export default function PlansPage() {
       const isNew = !editingPlan.id;
       const res = await fetch('/api/admin/plans', {
         method: isNew ? 'POST' : 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingPlan),
       });
@@ -65,6 +68,7 @@ export default function PlansPage() {
     try {
       const res = await fetch(`/api/admin/plans?id=${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       const data = await res.json();
       if (res.ok) {

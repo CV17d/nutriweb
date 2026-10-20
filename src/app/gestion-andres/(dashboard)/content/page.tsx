@@ -36,8 +36,8 @@ export default function ContentPage() {
   const fetchData = async () => {
     try {
       const [setRes, casRes] = await Promise.all([
-        fetch('/api/admin/settings'),
-        fetch('/api/admin/cases')
+        fetch('/api/admin/settings', { credentials: 'include' }),
+        fetch('/api/admin/cases', { credentials: 'include' })
       ]);
       const setData = await setRes.json();
       const casData = await casRes.json();
@@ -72,6 +72,7 @@ export default function ContentPage() {
       const value = { ...current, ...newValue };
       const res = await fetch('/api/admin/settings', {
         method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, value }),
       });
@@ -89,6 +90,7 @@ export default function ContentPage() {
       const isNew = !editingCase.id;
       const res = await fetch('/api/admin/cases', {
         method: isNew ? 'POST' : 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingCase),
       });
@@ -106,7 +108,10 @@ export default function ContentPage() {
   const deleteCase = async (id: number) => {
     if (!confirm('¿Seguro que deseas eliminar este testimonio?')) return;
     try {
-      const res = await fetch(`/api/admin/cases?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/cases?id=${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
       if (res.ok) fetchData();
     } catch (error) {
       alert('Error de conexión');
