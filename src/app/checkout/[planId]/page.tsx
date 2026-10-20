@@ -54,6 +54,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ planI
         planName={plan.name}
         planPrice={parseFloat(plan.price)}
         totalSessions={plan.total_sessions}
+        durationMonths={plan.duration_months}
       />
     </div>
   );

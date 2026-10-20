@@ -147,7 +147,8 @@ export default function Pricing({ plans = [] }: { plans?: any[] }) {
             </div>
             <p className="text-xs sm:text-sm text-gray-600 max-w-2xl leading-relaxed">
               • <strong>Planes desde $200 USD:</strong> Puedes diferir hasta en 3 cuotas <strong>sin intereses</strong> con tarjetas participantes (Pichincha, Diners, BGR, Interdin, etc.).<br />
-              • <strong>Planes menores a $200 USD:</strong> Opción diferida disponible hasta en 3 cuotas <strong>con intereses</strong> según las condiciones de tu banco emisor.
+              • <strong>Planes de 3 meses menores a $200 USD:</strong> Opción diferida disponible hasta en 3 cuotas <strong>con intereses</strong> según las condiciones de tu banco emisor.<br />
+              • <em>El Plan Básico (1 mes) aplica exclusivamente a pago de contado.</em>
             </p>
           </div>
           <button

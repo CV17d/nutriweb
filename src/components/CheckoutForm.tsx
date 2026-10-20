@@ -10,15 +10,22 @@ interface CheckoutFormProps {
   planName: string;
   planPrice: number;
   totalSessions: number;
+  durationMonths?: number;
 }
 
-export default function CheckoutForm({ planId, planName, planPrice, totalSessions }: CheckoutFormProps) {
+export default function CheckoutForm({ planId, planName, planPrice, totalSessions, durationMonths }: CheckoutFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [payphoneReady, setPayphoneReady] = useState(false);
   const [payphoneConfig, setPayphoneConfig] = useState<any>(null);
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
   const isNoInterestEligible = planPrice >= 200;
+  const isBasicPlan = 
+    (durationMonths !== undefined && durationMonths <= 1) || 
+    planName.toLowerCase().includes('básico') || 
+    planName.toLowerCase().includes('basico') ||
+    planPrice <= 75;
+  const allowsDeferred = !isBasicPlan;
   
   // Calendar state
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -423,46 +430,60 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
           </div>
           
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("contado")}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  paymentMethod === "contado"
-                    ? "border-[#0052FF] bg-blue-50/70 shadow-sm"
-                    : "border-gray-100 hover:border-gray-200 bg-white"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-bold text-gray-800 text-sm sm:text-base">Pago de Contado</h3>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'contado' ? 'border-[#0052FF]' : 'border-gray-300'}`}>
-                    {paymentMethod === 'contado' && <div className="w-2 h-2 rounded-full bg-[#0052FF]" />}
+            {allowsDeferred ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("contado")}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    paymentMethod === "contado"
+                      ? "border-[#0052FF] bg-blue-50/70 shadow-sm"
+                      : "border-gray-100 hover:border-gray-200 bg-white"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="font-bold text-gray-800 text-sm sm:text-base">Pago de Contado</h3>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'contado' ? 'border-[#0052FF]' : 'border-gray-300'}`}>
+                      {paymentMethod === 'contado' && <div className="w-2 h-2 rounded-full bg-[#0052FF]" />}
+                    </div>
                   </div>
-                </div>
-                <p className="text-xs text-gray-500">1 solo pago con tarjeta de débito o crédito</p>
-              </button>
+                  <p className="text-xs text-gray-500">1 solo pago con tarjeta de débito o crédito</p>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("diferido")}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
-                  paymentMethod === "diferido"
-                    ? "border-[#0052FF] bg-blue-50/70 shadow-sm"
-                    : "border-gray-100 hover:border-gray-200 bg-white"
-                }`}
-              >
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("diferido")}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    paymentMethod === "diferido"
+                      ? "border-[#0052FF] bg-blue-50/70 shadow-sm"
+                      : "border-gray-100 hover:border-gray-200 bg-white"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="font-bold text-gray-800 text-sm sm:text-base">Pago Diferido (Tarjeta de Crédito)</h3>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'diferido' ? 'border-[#0052FF]' : 'border-gray-300'}`}>
+                      {paymentMethod === 'diferido' && <div className="w-2 h-2 rounded-full bg-[#0052FF]" />}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">Paga en cuotas mensuales</p>
+                </button>
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl border-2 border-[#0052FF] bg-blue-50/70 shadow-sm">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-bold text-gray-800 text-sm sm:text-base">Pago Diferido (Tarjeta de Crédito)</h3>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'diferido' ? 'border-[#0052FF]' : 'border-gray-300'}`}>
-                    {paymentMethod === 'diferido' && <div className="w-2 h-2 rounded-full bg-[#0052FF]" />}
+                  <h3 className="font-bold text-gray-800 text-sm sm:text-base">Pago de Contado (1 mes)</h3>
+                  <div className="w-4 h-4 rounded-full border-2 border-[#0052FF] flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-[#0052FF]" />
                   </div>
                 </div>
-                <p className="text-xs text-gray-500">Paga en cuotas mensuales</p>
-              </button>
-            </div>
+                <p className="text-xs text-gray-600">
+                  El plan Básico tiene una duración de 1 mes, por lo que aplica únicamente a pago de contado con tarjeta de débito o crédito.
+                </p>
+              </div>
+            )}
 
             {/* Selector de meses si elige diferido */}
-            {paymentMethod === "diferido" && (
+            {paymentMethod === "diferido" && allowsDeferred && (
               <div className="mt-4 p-4 bg-slate-50 border border-blue-100 rounded-2xl space-y-3.5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <label className="block text-xs sm:text-sm font-bold text-gray-800">

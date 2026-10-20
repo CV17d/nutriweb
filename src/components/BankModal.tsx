@@ -114,7 +114,7 @@ export default function BankModal({ isOpen, onClose, defaultTab = 'no-interest' 
             </div>
           ) : (
             <div className="text-blue-900 bg-blue-50 border border-blue-200/80 p-2.5 rounded-xl">
-              <strong>Plazos con intereses:</strong> Hasta 3 cuotas. Aplica para planes menores a $200 (como <em>Básico</em> y <em>Esencial</em>). La tasa de interés depende del contrato con tu banco emisor.
+              <strong>Plazos con intereses:</strong> Hasta 3 cuotas. Aplica para el plan <em>Esencial</em> (menor a $200 USD). El plan <em>Básico</em> (1 mes) aplica exclusivamente a pago de contado.
             </div>
           )}
         </div>
