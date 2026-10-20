@@ -23,7 +23,7 @@ export default function Location({ photos = [] }: LocationProps) {
 
       {/* Grid Principal: 2 columnas iguales y equilibradas con items-stretch */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
-        
+
         {/* Columna Izquierda: Carrusel de Fotos del Consultorio */}
         <div className="flex flex-col h-full gap-3">
           <div className="px-1">
@@ -50,13 +50,13 @@ export default function Location({ photos = [] }: LocationProps) {
           <div className="w-full h-full flex-1 flex flex-col bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 transition-all duration-300 hover:shadow-2xl">
             {/* Mapa Interactivo (ocupa la parte superior) */}
             <div className="w-full flex-1 min-h-[240px] md:min-h-[280px] bg-brand-light relative overflow-hidden">
-              <iframe 
+              <iframe
                 src="https://maps.google.com/maps?q=-0.1326352,-78.4938373&t=&z=17&ie=UTF8&iwloc=&output=embed"
-                width="100%" 
-                height="100%" 
-                style={{ border: 0 }} 
-                allowFullScreen={false} 
-                loading="lazy" 
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={false}
+                loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Ubicación del consultorio de Andrés Burbano en Google Maps"
                 className="w-full h-full absolute inset-0"
@@ -79,8 +79,8 @@ export default function Location({ photos = [] }: LocationProps) {
                     Av. de la Prensa y Pedro de Valverde<br />
                     Quito – Ecuador
                   </p>
-                  <a 
-                    href="https://maps.app.goo.gl/1r8denLgxkjWyQiC8"
+                  <a
+                    href={process.env.NEXT_PUBLIC_CLINIC_LOCATION_LINK || "https://maps.app.goo.gl/1r8denLgxkjWyQiC8"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-electric hover:underline"

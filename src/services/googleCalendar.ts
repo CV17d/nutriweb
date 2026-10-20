@@ -34,8 +34,8 @@ export async function createAppointmentEvent(
     const durationMinutes = 120; // Todas las citas bloquean 2 horas en el calendario (120 mins)
     const endTime = new Date(date.getTime() + durationMinutes * 60000);
 
-    const eventSummary = isFreeConsultation 
-      ? `Consulta Gratuita (${appointmentType}) - ${clientName}` 
+    const eventSummary = isFreeConsultation
+      ? `Consulta Gratuita (${appointmentType}) - ${clientName}`
       : `Cita de Plan ${planName || 'Nutricional'} (${appointmentType}) - ${clientName}`;
 
     const isPresencial = appointmentType === 'Presencial';
@@ -43,7 +43,7 @@ export async function createAppointmentEvent(
     const meetLink = process.env.MEET_LINK || '';
 
     let eventDescription = `Cita agendada a través de la plataforma web.\nModalidad: ${appointmentType}\nCliente: ${clientName}\nEmail: ${clientEmail}${clientPhone ? `\nTeléfono: ${clientPhone}` : ''}${planName ? `\nPlan: ${planName}` : ''}`;
-    
+
     if (isPresencial) {
       eventDescription += `\nUbicación: ${clinicLink}`;
     } else if (meetLink) {
@@ -88,10 +88,10 @@ export async function createAppointmentEvent(
     });
 
     logger.info({ message: 'Evento de Google Calendar creado', eventId: response.data.id });
-    
+
     // Extraemos el enlace de Google Meet si existe
     const hangoutLink = response.data.hangoutLink || '';
-    
+
     return { ...response.data, hangoutLink };
   } catch (error) {
     logger.error('Error al crear el evento en Google Calendar', error);
@@ -107,7 +107,7 @@ export async function getBusySlots(dateStr: string) {
     const [year, month, day] = dateStr.split('-').map(Number);
     const startOfDay = new Date(year, month - 1, day);
     startOfDay.setHours(0, 0, 0, 0);
-    
+
     const endOfDay = new Date(year, month - 1, day);
     endOfDay.setHours(23, 59, 59, 999);
 

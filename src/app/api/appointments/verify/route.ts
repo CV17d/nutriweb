@@ -13,7 +13,7 @@ async function verifyHandler(request: Request) {
 
   try {
     const appointment = await confirmFreeAppointment(token);
-    
+
     // Generar el enlace de Google Calendar
     const meetLink = process.env.MEET_LINK || '';
     const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
@@ -21,10 +21,10 @@ async function verifyHandler(request: Request) {
 
     const endTime = new Date(appointment.date.getTime() + 120 * 60000); // 2 horas
     const formatGCalDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
-    
+
     const startStr = formatGCalDate(appointment.date);
     const endStr = formatGCalDate(endTime);
-    
+
     const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
     const details = encodeURIComponent(
       isPresencial
@@ -32,7 +32,7 @@ async function verifyHandler(request: Request) {
         : `Cita nutricional (Virtual).${meetLink ? `\nEnlace de reunión: ${meetLink}` : ''}`
     );
     const location = encodeURIComponent(isPresencial ? clinicLink : meetLink);
-    
+
     const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
 
     // Redirigir a la página de éxito pasando el enlace y modalidad

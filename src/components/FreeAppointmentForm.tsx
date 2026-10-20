@@ -10,10 +10,10 @@ export default function FreeAppointmentForm() {
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [appointmentType] = useState<"Virtual" | "Presencial">("Virtual");
-  
+
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -49,7 +49,7 @@ export default function FreeAppointmentForm() {
     const month = String(currentDate.getMonth() + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
     const dateStr = `${year}-${month}-${d}`;
-    
+
     setLoadingSlots(true);
     try {
       const res = await fetch(`/api/appointments/availability?date=${dateStr}`);
@@ -108,7 +108,7 @@ export default function FreeAppointmentForm() {
         if (period === "AM" && hours === 12) hours = 0;
         dateToSubmit.setHours(hours, minutes, 0, 0);
       }
-      
+
       const res = await fetch("/api/appointments/free", {
         method: "POST",
         headers: {
@@ -143,7 +143,7 @@ export default function FreeAppointmentForm() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const isCurrentMonth = currentDate.getFullYear() === today.getFullYear() && currentDate.getMonth() === today.getMonth();
-    
+
     // Limitar la navegación a 2 meses en el futuro
     const monthDiff = (currentDate.getFullYear() - today.getFullYear()) * 12 + (currentDate.getMonth() - today.getMonth());
     const isMaxMonth = monthDiff >= 2;
@@ -167,13 +167,12 @@ export default function FreeAppointmentForm() {
           type="button"
           disabled={isPast || isSunday}
           onClick={() => handleDateSelect(day)}
-          className={`h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-xs sm:text-sm transition-colors ${
-            isPast || isSunday
+          className={`h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center rounded-full text-xs sm:text-sm transition-colors ${isPast || isSunday
               ? "text-gray-300 cursor-not-allowed bg-gray-50/50 pointer-events-none opacity-50"
               : isSelected
                 ? "bg-[#0052FF] text-white font-medium shadow-md"
                 : "hover:bg-gray-100 text-gray-700"
-          }`}
+            }`}
         >
           {day}
         </button>
@@ -215,20 +214,20 @@ export default function FreeAppointmentForm() {
 
   const getGoogleCalendarUrl = () => {
     if (!selectedDate || !selectedTime) return "#";
-    
+
     const year = currentDate.getFullYear();
     const [hours, minutes] = selectedTime.split(':');
-    
+
     const dateObj = new Date(year, currentDate.getMonth(), selectedDate, parseInt(hours), parseInt(minutes));
     const endDateObj = new Date(dateObj.getTime() + 120 * 60 * 1000); // 2 horas
 
     const formatGCalDate = (date: Date) => {
-      return date.toISOString().replace(/-|:|\.\d\d\d/g,"");
+      return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
     };
 
     const startStr = formatGCalDate(dateObj);
     const endStr = formatGCalDate(endDateObj);
-    
+
     const isPresencial = appointmentType === "Presencial";
     const meetLink = process.env.NEXT_PUBLIC_MEET_LINK || "https://meet.google.com/iny-ztwg-zne";
     const clinicLink = process.env.NEXT_PUBLIC_CLINIC_LOCATION_LINK || "https://maps.app.goo.gl/1r8denLgxkjWyQiC8";
@@ -258,9 +257,9 @@ export default function FreeAppointmentForm() {
           <p className="text-gray-500 text-sm sm:text-base md:text-lg max-w-md mx-auto mb-6 sm:mb-8 leading-relaxed">
             Para evitar el spam, te hemos enviado un correo de confirmación. Por favor, <strong>haz clic en el enlace</strong> de ese correo para confirmar y agendar tu cita definitivamente.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
+            <Link
               href="/"
               replace
               className="px-8 py-3.5 bg-[#0052FF] text-white rounded-full font-bold hover:bg-blue-700 transition-colors shadow-md inline-block text-center text-sm sm:text-base"
@@ -271,7 +270,7 @@ export default function FreeAppointmentForm() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-          
+
           {/* Info Banner */}
           <div className="bg-blue-50 text-blue-700 px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl text-xs sm:text-sm font-medium flex items-start sm:items-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-blue-500 mt-0.5 sm:mt-0 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -288,7 +287,7 @@ export default function FreeAppointmentForm() {
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Selecciona la Fecha</h2>
             </div>
-            
+
             <div className="bg-slate-50/50 rounded-2xl p-3 sm:p-6 border border-gray-50 overflow-x-auto">
               {renderCalendar()}
 
@@ -307,11 +306,10 @@ export default function FreeAppointmentForm() {
                           key={time}
                           type="button"
                           onClick={() => setSelectedTime(time)}
-                          className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border ${
-                            selectedTime === time
+                          className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border ${selectedTime === time
                               ? "border-[#0052FF] bg-blue-50 text-[#0052FF]"
                               : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                          }`}
+                            }`}
                         >
                           {time}
                         </button>
@@ -405,7 +403,7 @@ export default function FreeAppointmentForm() {
                 onChange={(token) => setCaptchaToken(token)}
               />
             </div>
-            
+
             {/* Checkbox de Consentimiento Legal */}
             <div className="w-full max-w-md bg-white p-4 rounded-2xl border border-gray-100 shadow-xs">
               <div className="flex items-start gap-3">

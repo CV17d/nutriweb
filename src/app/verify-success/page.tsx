@@ -13,7 +13,7 @@ export default async function VerifySuccessPage(props: {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-6">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-6 sm:p-10 text-center relative overflow-hidden">
-        
+
         {isSuccess ? (
           <>
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-500"></div>
@@ -23,7 +23,7 @@ export default async function VerifySuccessPage(props: {
               </svg>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 sm:mb-4 tracking-tight">¡Cita Confirmada!</h1>
-            
+
             {!isPresencial ? (
               <>
                 <div className="bg-blue-50 border-l-4 border-[#0052FF] p-3.5 sm:p-4 mb-4 sm:mb-6 text-left rounded-r-lg">
@@ -85,8 +85,8 @@ export default async function VerifySuccessPage(props: {
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 sm:mb-4 tracking-tight">Error de Verificación</h1>
             <p className="text-gray-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed">
-              {errorType === 'missing_token' 
-                ? 'El enlace de verificación parece estar incompleto o roto.' 
+              {errorType === 'missing_token'
+                ? 'El enlace de verificación parece estar incompleto o roto.'
                 : 'El enlace es inválido, ya expiró o la cita ya fue verificada.'}
             </p>
           </>

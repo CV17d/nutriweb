@@ -273,8 +273,8 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
                         key={time}
                         onClick={() => setSelectedTime(time)}
                         className={`py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${selectedTime === time
-                            ? 'bg-brand-navy text-white shadow-md'
-                            : 'bg-white border border-gray-200 text-gray-700 hover:border-brand-navy hover:text-brand-navy'
+                          ? 'bg-brand-navy text-white shadow-md'
+                          : 'bg-white border border-gray-200 text-gray-700 hover:border-brand-navy hover:text-brand-navy'
                           }`}
                       >
                         {time}

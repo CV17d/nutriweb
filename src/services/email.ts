@@ -22,7 +22,7 @@ export async function sendVerificationEmail(
   try {
     const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const verifyUrl = `${appUrl}/api/appointments/verify?token=${token}`;
-    
+
     // Formatear fecha para el correo
     const dateStr = appointmentDate.toLocaleString('es-ES', {
       weekday: 'long',
@@ -96,20 +96,20 @@ export async function sendFinalConfirmationEmail(
 
     const endTime = new Date(appointmentDate.getTime() + 120 * 60000); // 2 horas
     const formatGCalDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
-    
+
     const startStr = formatGCalDate(appointmentDate);
     const endStr = formatGCalDate(endTime);
-    
+
     const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
     const isPresencial = appointmentType === 'Presencial';
-    
+
     const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
-    const detailsText = isPresencial 
-      ? `Cita nutricional (Presencial).\nUbicación: ${clinicLink}` 
+    const detailsText = isPresencial
+      ? `Cita nutricional (Presencial).\nUbicación: ${clinicLink}`
       : `Cita nutricional (Virtual).${meetLink ? `\nEnlace de reunión: ${meetLink}` : ''}`;
     const details = encodeURIComponent(detailsText);
     const location = encodeURIComponent(isPresencial ? clinicLink : meetLink);
-    
+
     const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
 
     const resend = getResendClient();
@@ -177,8 +177,8 @@ export async function sendSubscriptionLinkEmail(
   try {
     const appUrl = customBaseUrl || process.env.NEXTAUTH_URL || 'http://localhost:3000';
     const agendaUrl = `${appUrl}/agenda/${subscriptionId}`;
-    
-    const message = sessionsUsed <= 1 
+
+    const message = sessionsUsed <= 1
       ? `Tu primera cita ya está en proceso. Para tus <strong>próximas consultas</strong>, hemos creado una agenda exclusiva para ti. Desde allí podrás reservar la fecha y hora de tus siguientes sesiones a medida que avances en el plan.`
       : `Es momento de agendar tu <strong>siguiente cita de seguimiento</strong> (Sesión ${sessionsUsed + 1} de ${totalSessions}). Desde tu agenda exclusiva podrás reservar la fecha y hora de tu próxima sesión.`;
 
@@ -229,7 +229,7 @@ export async function sendReminderEmail(
     const timeText = is2Hours ? "2 HORAS" : "48 HORAS";
     const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
     const meetLink = process.env.MEET_LINK || '';
-    
+
     const dateStr = appointmentDate.toLocaleString('es-ES', {
       weekday: 'long',
       year: 'numeric',
