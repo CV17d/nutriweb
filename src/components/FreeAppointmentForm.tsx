@@ -231,7 +231,7 @@ export default function FreeAppointmentForm() {
     
     const isPresencial = appointmentType === "Presencial";
     const meetLink = process.env.NEXT_PUBLIC_MEET_LINK || "https://meet.google.com/iny-ztwg-zne";
-    const clinicLink = process.env.NEXT_PUBLIC_CLINIC_LOCATION_LINK || "https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic";
+    const clinicLink = process.env.NEXT_PUBLIC_CLINIC_LOCATION_LINK || "https://maps.app.goo.gl/1r8denLgxkjWyQiC8";
 
     const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
     const details = encodeURIComponent(

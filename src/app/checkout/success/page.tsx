@@ -10,7 +10,7 @@ export default async function CheckoutSuccessPage({
 
   const isPresencial = appointmentType === 'Presencial';
   const meetLink = process.env.MEET_LINK || '';
-  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
 
   if (date && typeof date === 'string') {
     const dateObj = new Date(date);

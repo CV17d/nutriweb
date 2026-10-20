@@ -8,7 +8,7 @@ export default async function VerifySuccessPage(props: {
   const errorType = searchParams.error;
   const isPresencial = searchParams.type === 'Presencial';
   const meetLink = process.env.MEET_LINK || '';
-  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-6">

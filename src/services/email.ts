@@ -100,7 +100,7 @@ export async function sendFinalConfirmationEmail(
     const startStr = formatGCalDate(appointmentDate);
     const endStr = formatGCalDate(endTime);
     
-    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
     const isPresencial = appointmentType === 'Presencial';
     
     const title = encodeURIComponent("Cita Nutricional - Andrés Burbano");
@@ -227,7 +227,7 @@ export async function sendReminderEmail(
 ) {
   try {
     const timeText = is2Hours ? "2 HORAS" : "48 HORAS";
-    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
     const meetLink = process.env.MEET_LINK || '';
     
     const dateStr = appointmentDate.toLocaleString('es-ES', {

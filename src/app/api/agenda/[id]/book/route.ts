@@ -43,7 +43,7 @@ async function bookHandler(request: Request, { params }: { params: Promise<{ id:
   });
 
   const meetLink = process.env.MEET_LINK || '';
-  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+  const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
   const isPresencial = appointmentType === 'Presencial';
 
   const endTime = new Date(new Date(date).getTime() + 120 * 60000); // 2 horas

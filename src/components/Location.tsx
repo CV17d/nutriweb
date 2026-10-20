@@ -51,14 +51,14 @@ export default function Location({ photos = [] }: LocationProps) {
             {/* Mapa Interactivo (ocupa la parte superior) */}
             <div className="w-full flex-1 min-h-[240px] md:min-h-[280px] bg-brand-light relative overflow-hidden">
               <iframe 
-                src="https://maps.google.com/maps?q=Av.+de+la+Prensa+y+Pedro+de+Valverde,+Quito,+Ecuador&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=-0.1326352,-78.4938373&t=&z=17&ie=UTF8&iwloc=&output=embed"
                 width="100%" 
                 height="100%" 
                 style={{ border: 0 }} 
                 allowFullScreen={false} 
                 loading="lazy" 
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Ubicación del consultorio en Google Maps"
+                title="Ubicación del consultorio de Andrés Burbano en Google Maps"
                 className="w-full h-full absolute inset-0"
               ></iframe>
             </div>
@@ -80,7 +80,7 @@ export default function Location({ photos = [] }: LocationProps) {
                     Quito – Ecuador
                   </p>
                   <a 
-                    href="https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic"
+                    href="https://maps.app.goo.gl/1r8denLgxkjWyQiC8"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-electric hover:underline"

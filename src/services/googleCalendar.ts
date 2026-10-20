@@ -39,7 +39,7 @@ export async function createAppointmentEvent(
       : `Cita de Plan ${planName || 'Nutricional'} (${appointmentType}) - ${clientName}`;
 
     const isPresencial = appointmentType === 'Presencial';
-    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
     const meetLink = process.env.MEET_LINK || '';
 
     let eventDescription = `Cita agendada a través de la plataforma web.\nModalidad: ${appointmentType}\nCliente: ${clientName}\nEmail: ${clientEmail}${clientPhone ? `\nTeléfono: ${clientPhone}` : ''}${planName ? `\nPlan: ${planName}` : ''}`;

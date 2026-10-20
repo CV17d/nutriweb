@@ -16,7 +16,7 @@ async function verifyHandler(request: Request) {
     
     // Generar el enlace de Google Calendar
     const meetLink = process.env.MEET_LINK || '';
-    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic';
+    const clinicLink = process.env.CLINIC_LOCATION_LINK || 'https://maps.app.goo.gl/1r8denLgxkjWyQiC8';
     const isPresencial = appointment.type === 'Presencial';
 
     const endTime = new Date(appointment.date.getTime() + 120 * 60000); // 2 horas

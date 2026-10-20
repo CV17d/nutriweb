@@ -161,8 +161,8 @@ export default function AgendaPage({ params }: { params: Promise<{ id: string }>
           {isPresencial && (
             <div className="bg-blue-50 border border-blue-100 rounded-2xl p-3.5 sm:p-4 mb-4 sm:mb-6 text-left">
               <p className="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Ubicación del consultorio</p>
-              <a href={bookingResult?.clinicLink || "https://maps.app.goo.gl/jhvHicvbBZzniahcA?g_st=ic"} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm font-semibold text-brand-electric hover:underline break-all">
-                Centro de Alto Rendimiento AB, Quito (Ver en Maps)
+              <a href={bookingResult?.clinicLink || "https://maps.app.goo.gl/1r8denLgxkjWyQiC8"} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm font-semibold text-brand-electric hover:underline break-all">
+                Consultorio Andrés Burbano - Quito (Ver en Maps)
               </a>
             </div>
           )}
