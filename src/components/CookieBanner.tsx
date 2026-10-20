@@ -98,11 +98,10 @@ export default function CookieBanner() {
       className="fixed bottom-0 inset-x-0 z-50 p-4 sm:p-6 bg-brand-navy/95 backdrop-blur-md text-brand-white border-t border-white/10 shadow-2xl animate-fadeIn"
     >
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
-        
+
         {/* Texto explicativo */}
         <div className="flex-1 space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-xl" role="img" aria-label="Cookie">🍪</span>
             <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
               Tu Privacidad y Uso de Cookies
             </h3>
