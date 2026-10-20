@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import BankModal from './BankModal';
 
 interface CheckoutFormProps {
   planId: number;
@@ -16,6 +17,8 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
   const [loading, setLoading] = useState(false);
   const [payphoneReady, setPayphoneReady] = useState(false);
   const [payphoneConfig, setPayphoneConfig] = useState<any>(null);
+  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
+  const isNoInterestEligible = planPrice >= 200;
   
   // Calendar state
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -460,10 +463,23 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
 
             {/* Selector de meses si elige diferido */}
             {paymentMethod === "diferido" && (
-              <div className="mt-4 p-4 bg-slate-50 border border-blue-100 rounded-xl space-y-3">
-                <label className="block text-xs sm:text-sm font-semibold text-gray-800">
-                  Selecciona la cantidad de meses:
-                </label>
+              <div className="mt-4 p-4 bg-slate-50 border border-blue-100 rounded-2xl space-y-3.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="block text-xs sm:text-sm font-bold text-gray-800">
+                    Selecciona el plazo de diferido:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsBankModalOpen(true)}
+                    className="text-xs font-bold text-brand-electric hover:underline flex items-center gap-1 w-fit"
+                  >
+                    <span>Ver bancos aceptados</span>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-2 gap-3 max-w-sm">
                   {[3, 6].map((months) => (
                     <button
@@ -483,9 +499,32 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  Nota: Los pagos diferidos aplican únicamente para tarjetas de crédito de bancos locales autorizados (Diners, Pichincha, Guayaquil, Pacífico, Produbanco, etc.).
-                </p>
+
+                {/* Aclaración según monto mínimo de Payphone */}
+                {isNoInterestEligible ? (
+                  <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1.5">
+                    <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                      <span className="text-emerald-600 text-sm">✓</span>
+                      <span>Diferido SIN INTERESES disponible (Monto ≥ $200 USD)</span>
+                    </div>
+                    <p className="text-emerald-800 leading-relaxed">
+                      Este plan aplica a <strong>3 meses</strong> (monto mínimo $200) y <strong>6 meses</strong> (monto mínimo $250) <strong>sin intereses</strong> con tarjetas de crédito de bancos locales participantes (Pichincha, Diners Club, BGR, Interdin, etc.).
+                    </p>
+                    <p className="text-[11px] text-emerald-700">
+                      *Si tu tarjeta pertenece a una entidad no convenida para tasa 0%, el diferido se procesará con las condiciones de tu banco emisor.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs space-y-1.5">
+                    <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                      <span className="text-amber-600 text-sm">ℹ️</span>
+                      <span>Diferido CON INTERESES (Monto &lt; $200 USD)</span>
+                    </div>
+                    <p className="text-amber-800 leading-relaxed">
+                      Para este plan de <strong>${planPrice.toFixed(2)} USD</strong> (monto inferior al umbral de $200 USD exigido por Payphone para diferidos sin recargo), las cuotas se procesan <strong>con intereses</strong> según la tasa y condiciones de tu banco emisor.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -510,11 +549,15 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
           </div>
 
           <div className="text-xs sm:text-sm text-gray-500 mb-2">
-            Método de cobro: <span className="font-medium text-gray-700">{paymentMethod === 'diferido' ? `Diferido (${installments} meses)` : 'Contado (1 pago)'}</span>
+            Método de cobro: <span className="font-medium text-gray-700">
+              {paymentMethod === 'diferido' 
+                ? `Diferido (${installments} meses - ${isNoInterestEligible ? 'Sin intereses*' : 'Con intereses*'})` 
+                : 'Contado (1 pago)'}
+            </span>
           </div>
 
           {paymentMethod === 'diferido' && (
-            <div className="text-xs text-blue-700 bg-blue-50 border border-blue-100 px-3 py-2 rounded-lg mb-2 font-medium">
+            <div className={`text-xs px-3 py-2 rounded-lg mb-2 font-medium ${isNoInterestEligible ? 'text-emerald-800 bg-emerald-50 border border-emerald-100' : 'text-amber-800 bg-amber-50 border border-amber-100'}`}>
               Cuota referencial: ~${(planPrice / installments).toFixed(2)} / mes*
             </div>
           )}
@@ -642,6 +685,12 @@ export default function CheckoutForm({ planId, planName, planPrice, totalSession
           </div>
         </div>
       </div>
+
+      <BankModal
+        isOpen={isBankModalOpen}
+        onClose={() => setIsBankModalOpen(false)}
+        defaultTab={isNoInterestEligible ? 'no-interest' : 'with-interest'}
+      />
     </form>
   );
 }
