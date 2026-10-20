@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createSession, COOKIE_NAME, COOKIE_OPTIONS, ABSOLUTE_TIMEOUT_MS } from '../../../../lib/auth';
-import { checkRateLimit, resetRateLimit, getClientIp } from '../../../../lib/rate-limit';
+import { createSession } from '../../../../lib/auth';
+import { checkRateLimit, getClientIp } from '../../../../lib/rate-limit';
 import { withErrorHandler } from '../../../../lib/api-handler';
 import { logSecurityEvent } from '../../../../lib/security-logger';
 
@@ -23,8 +23,8 @@ async function loginHandler(request: Request) {
   const ip = getClientIp(request);
   const userAgent = request.headers.get('user-agent') || 'unknown';
 
-  // 1. Rate Limiting persistente en BD: máximo 15 intentos en 15 minutos por IP
-  const rateLimit = await checkRateLimit(`login:${ip}`, 15, 15 * 60);
+  // 1. Rate Limiting persistente en BD: máximo 5 intentos en 15 minutos por IP
+  const rateLimit = await checkRateLimit(`login:${ip}`, 5, 15 * 60);
   if (!rateLimit.success) {
     // Registrar el evento permanente de bloqueo y disparar alerta por correo si aplica
     await logSecurityEvent({
@@ -32,7 +32,7 @@ async function loginHandler(request: Request) {
       ip,
       path: '/api/admin/login',
       details: {
-        attempts: 15,
+        attempts: 5,
         resetAt: rateLimit.resetAt,
         message: 'Límite de intentos superado. IP bloqueada por 15 minutos.',
       },
@@ -79,11 +79,8 @@ async function loginHandler(request: Request) {
     return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 });
   }
 
-  // Contraseña correcta: limpiar inmediatamente el rate limit para esta IP
-  await resetRateLimit(`login:${ip}`);
-
   // Passwords match, create session
-  const sessionToken = await createSession();
+  await createSession();
 
   // Registrar login exitoso
   await logSecurityEvent({
@@ -94,13 +91,7 @@ async function loginHandler(request: Request) {
     userAgent,
   });
 
-  const response = NextResponse.json({ success: true });
-  response.cookies.set(COOKIE_NAME, sessionToken, {
-    ...COOKIE_OPTIONS,
-    expires: new Date(Date.now() + ABSOLUTE_TIMEOUT_MS),
-  });
-
-  return response;
+  return NextResponse.json({ success: true });
 }
 
 export const POST = withErrorHandler(loginHandler);

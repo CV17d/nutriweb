@@ -25,9 +25,7 @@ export default function PatientsPage() {
 
   const fetchPatients = async () => {
     try {
-      const res = await fetch('/api/admin/patients', {
-        credentials: 'include',
-      });
+      const res = await fetch('/api/admin/patients');
       const data = await res.json();
       if (Array.isArray(data)) {
         setPatients(data);
@@ -51,7 +49,6 @@ export default function PatientsPage() {
     try {
       const res = await fetch('/api/admin/send-link', {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, subscription_id: subscriptionId }),
       });
@@ -61,8 +58,8 @@ export default function PatientsPage() {
       if (res.ok) {
         alert(data.message || '✅ Enlace enviado correctamente al correo del paciente');
       } else if (res.status === 401) {
-        alert('⚠️ Tu sesión de administrador ha caducado. Por favor, vuelve a iniciar sesión.');
-        window.location.href = '/gestion-andres/login';
+        alert('⚠️ Tu sesión de administrador ha caducado por inactividad. Por favor, vuelve a iniciar sesión.');
+        window.location.href = '/gestion-andres/login?reason=expired';
       } else {
         alert(`❌ ${data.message || data.error || 'Error al enviar el enlace. Intenta de nuevo.'}`);
       }
@@ -97,7 +94,6 @@ export default function PatientsPage() {
     try {
       const res = await fetch('/api/admin/patients', {
         method: 'DELETE',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subscriptionIds: selectedIds })
       });

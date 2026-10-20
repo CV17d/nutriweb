@@ -36,7 +36,8 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        window.location.href = '/gestion-andres';
+        router.push('/gestion-andres');
+        router.refresh();
       } else {
         const data = await res.json();
         setError(data.error || 'Error al iniciar sesión');
