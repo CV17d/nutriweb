@@ -80,7 +80,7 @@ async function loginHandler(request: Request) {
   }
 
   // Passwords match, create session
-  await createSession();
+  const sessionToken = await createSession();
 
   // Registrar login exitoso
   await logSecurityEvent({
@@ -91,7 +91,16 @@ async function loginHandler(request: Request) {
     userAgent,
   });
 
-  return NextResponse.json({ success: true });
+  const response = NextResponse.json({ success: true });
+  response.cookies.set('admin_session', sessionToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 8 * 60 * 60,
+  });
+
+  return response;
 }
 
 export const POST = withErrorHandler(loginHandler);

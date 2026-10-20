@@ -63,6 +63,7 @@ export async function verifySession(session: string | undefined = ''): Promise<S
     const encodedKey = getEncodedJwtSecret();
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ['HS256'],
+      clockTolerance: 60, // Tolerancia de 60 segundos ante posibles desfases de reloj entre servidores/servicios
     });
 
     const now = Date.now();
@@ -71,11 +72,13 @@ export async function verifySession(session: string | undefined = ''): Promise<S
 
     // 1. Control de expiración absoluta (máximo 8 horas desde el login inicial)
     if (now - authTime > ABSOLUTE_TIMEOUT_MS) {
+      console.warn('[AUTH] Sesión expirada por límite absoluto (8h)');
       return null;
     }
 
-    // 2. Control de inactividad (máximo 30 minutos sin solicitudes)
+    // 2. Control de inactividad (máximo 2 horas sin solicitudes)
     if (now - lastActive > INACTIVITY_TIMEOUT_MS) {
+      console.warn('[AUTH] Sesión expirada por inactividad (2h)');
       return null;
     }
 
@@ -85,7 +88,8 @@ export async function verifySession(session: string | undefined = ''): Promise<S
       lastActive,
       ...payload,
     };
-  } catch (error) {
+  } catch (error: any) {
+    console.error('[AUTH ERROR] Error validando sesión JWT:', error?.message || error);
     return null;
   }
 }

@@ -18,7 +18,6 @@ export default async function proxy(request: NextRequest) {
     
     if (!verified || verified.role !== 'admin') {
       const redirectRes = NextResponse.redirect(new URL('/gestion-andres/login?reason=expired', request.url));
-      redirectRes.cookies.delete(COOKIE_NAME);
       return redirectRes;
     }
   }
@@ -28,20 +27,18 @@ export default async function proxy(request: NextRequest) {
     const verified = await verifySession(sessionValue);
     
     if (!verified || verified.role !== 'admin') {
-      const unauthRes = NextResponse.json(
+      return NextResponse.json(
         { error: 'Unauthorized', message: 'Sesión caducada por inactividad o inválida' },
         { status: 401 }
       );
-      unauthRes.cookies.delete(COOKIE_NAME);
-      return unauthRes;
     }
   }
 
-  // Deslizamiento de sesión (Sliding Session): refrescar si la sesión es válida y pasaron > 2 min de actividad
+  // Deslizamiento de sesión (Sliding Session): refrescar si la sesión es válida y pasaron > 5 min de actividad
   let refreshedToken: string | null = null;
   if (sessionValue && (pathname.startsWith('/gestion-andres') || pathname.startsWith('/api/admin'))) {
     const verified = await verifySession(sessionValue);
-    if (verified && Date.now() - verified.lastActive > 2 * 60 * 1000) {
+    if (verified && Date.now() - verified.lastActive > 5 * 60 * 1000) {
       try {
         refreshedToken = await signRefreshedSession(verified);
       } catch (err) {
@@ -83,6 +80,6 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Se ejecuta el proxy en las rutas del panel, api y captura de la antigua ruta admin
-  matcher: ['/admin/:path*', '/admin', '/gestion-andres/:path*', '/api/:path*'],
+  // Se ejecuta el proxy en las rutas del panel, api administrativa y captura de la antigua ruta admin
+  matcher: ['/admin', '/admin/:path*', '/gestion-andres', '/gestion-andres/:path*', '/api/admin/:path*'],
 };

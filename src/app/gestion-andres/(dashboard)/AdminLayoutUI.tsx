@@ -26,11 +26,17 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
     activityEvents.forEach((ev) => window.addEventListener(ev, resetTimer));
     resetTimer();
 
-    // Interceptar fetch para detectar respuestas 401 (sesión expirada en servidor)
+    // Interceptar fetch solo en endpoints administrativos para detectar 401
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
       const response = await originalFetch(...args);
-      if (response.status === 401 && !window.location.pathname.startsWith('/gestion-andres/login')) {
+      const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || '';
+      if (
+        response.status === 401 &&
+        url.includes('/api/admin') &&
+        !url.includes('/api/admin/login') &&
+        !window.location.pathname.startsWith('/gestion-andres/login')
+      ) {
         window.location.href = '/gestion-andres/login?reason=expired';
       }
       return response;
