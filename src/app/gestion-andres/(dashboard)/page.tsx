@@ -145,7 +145,7 @@ export default async function AdminDashboard() {
               <span className="material-symbols-outlined text-[20px] sm:text-[24px]">verified_user</span>
             </div>
             <Link
-              href="/admin/patients"
+              href="/gestion-andres/patients"
               className="text-brand-electric font-label-sm text-xs hover:underline flex items-center gap-0.5"
             >
               Ver Pacientes <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -211,7 +211,7 @@ export default async function AdminDashboard() {
               </p>
             </div>
             <Link 
-              href="/admin/plans" 
+              href="/gestion-andres/plans" 
               className="text-brand-electric font-semibold text-xs hover:underline flex items-center gap-1 shrink-0"
             >
               Planes <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -369,7 +369,7 @@ export default async function AdminDashboard() {
             </div>
 
             <Link
-              href="/admin/patients"
+              href="/gestion-andres/patients"
               className="w-full mt-5 py-2.5 px-4 bg-brand-electric hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
             >
               <span className="material-symbols-outlined text-[16px]">calendar_month</span>
@@ -392,7 +392,7 @@ export default async function AdminDashboard() {
               Agrega, ordena o elimina las fotografías del consultorio que se muestran a los pacientes en la página de inicio.
             </p>
             <Link
-              href="/admin/images"
+              href="/gestion-andres/images"
               className="w-full py-2.5 px-4 bg-surface-container-low hover:bg-brand-electric hover:text-white text-brand-electric rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border border-outline-variant/30 hover:border-brand-electric"
             >
               <span className="material-symbols-outlined text-[16px]">edit</span>

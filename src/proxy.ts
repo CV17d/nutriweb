@@ -7,12 +7,17 @@ export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionValue = request.cookies.get(COOKIE_NAME)?.value;
 
-  // Protect /admin routes (except /admin/login)
-  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+  // Si intentan acceder a la antigua ruta /admin, responder 404 para no dar indicios de existencia
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
+  // Protect /gestion-andres routes (except /gestion-andres/login)
+  if (pathname.startsWith('/gestion-andres') && !pathname.startsWith('/gestion-andres/login')) {
     const verified = await verifySession(sessionValue);
     
     if (!verified || verified.role !== 'admin') {
-      const redirectRes = NextResponse.redirect(new URL('/admin/login?reason=expired', request.url));
+      const redirectRes = NextResponse.redirect(new URL('/gestion-andres/login?reason=expired', request.url));
       redirectRes.cookies.delete(COOKIE_NAME);
       return redirectRes;
     }
@@ -34,7 +39,7 @@ export default async function proxy(request: NextRequest) {
 
   // Deslizamiento de sesión (Sliding Session): refrescar si la sesión es válida y pasaron > 2 min de actividad
   let refreshedToken: string | null = null;
-  if (sessionValue && (pathname.startsWith('/admin') || pathname.startsWith('/api/admin'))) {
+  if (sessionValue && (pathname.startsWith('/gestion-andres') || pathname.startsWith('/api/admin'))) {
     const verified = await verifySession(sessionValue);
     if (verified && Date.now() - verified.lastActive > 2 * 60 * 1000) {
       try {
@@ -78,6 +83,6 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Se ejecuta el proxy en todas las rutas bajo /admin y /api
-  matcher: ['/admin/:path*', '/api/:path*'],
+  // Se ejecuta el proxy en las rutas del panel, api y captura de la antigua ruta admin
+  matcher: ['/admin/:path*', '/admin', '/gestion-andres/:path*', '/api/:path*'],
 };

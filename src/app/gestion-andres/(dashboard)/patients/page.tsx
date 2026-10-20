@@ -59,7 +59,7 @@ export default function PatientsPage() {
         alert(data.message || '✅ Enlace enviado correctamente al correo del paciente');
       } else if (res.status === 401) {
         alert('⚠️ Tu sesión de administrador ha caducado por inactividad. Por favor, vuelve a iniciar sesión.');
-        window.location.href = '/admin/login?reason=expired';
+        window.location.href = '/gestion-andres/login?reason=expired';
       } else {
         alert(`❌ ${data.message || data.error || 'Error al enviar el enlace. Intenta de nuevo.'}`);
       }

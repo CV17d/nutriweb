@@ -10,7 +10,7 @@ export default async function AdminLayout({
   // Defensa en profundidad a nivel de Server Component
   const session = await requireAdminSession();
   if (!session) {
-    redirect('/admin/login');
+    redirect('/gestion-andres/login');
   }
 
   return <AdminLayoutUI>{children}</AdminLayoutUI>;

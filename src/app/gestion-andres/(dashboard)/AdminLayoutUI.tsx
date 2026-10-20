@@ -18,7 +18,7 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
     const resetTimer = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        window.location.href = '/admin/login?reason=inactivity';
+        window.location.href = '/gestion-andres/login?reason=inactivity';
       }, INACTIVITY_LIMIT_MS);
     };
 
@@ -30,8 +30,8 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
       const response = await originalFetch(...args);
-      if (response.status === 401 && !window.location.pathname.startsWith('/admin/login')) {
-        window.location.href = '/admin/login?reason=expired';
+      if (response.status === 401 && !window.location.pathname.startsWith('/gestion-andres/login')) {
+        window.location.href = '/gestion-andres/login?reason=expired';
       }
       return response;
     };
@@ -44,11 +44,11 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
   }, []);
 
   const navLinks = [
-    { name: 'Dashboard', href: '/admin', icon: 'dashboard' },
-    { name: 'Control de Pacientes', href: '/admin/patients', icon: 'person' },
-    { name: 'Gestión de Planes', href: '/admin/plans', icon: 'list_alt' },
-    { name: 'Contenido y Testimonios', href: '/admin/content', icon: 'article' },
-    { name: 'Gestión de Imágenes', href: '/admin/images', icon: 'image' },
+    { name: 'Dashboard', href: '/gestion-andres', icon: 'dashboard' },
+    { name: 'Control de Pacientes', href: '/gestion-andres/patients', icon: 'person' },
+    { name: 'Gestión de Planes', href: '/gestion-andres/plans', icon: 'list_alt' },
+    { name: 'Contenido y Testimonios', href: '/gestion-andres/content', icon: 'article' },
+    { name: 'Gestión de Imágenes', href: '/gestion-andres/images', icon: 'image' },
   ];
 
   return (
