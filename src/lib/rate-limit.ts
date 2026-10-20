@@ -86,3 +86,15 @@ export async function checkRateLimit(
     };
   }
 }
+
+/**
+ * Restablece o elimina el registro de rate limit para una clave (ej: tras login exitoso)
+ */
+export async function resetRateLimit(key: string): Promise<void> {
+  try {
+    await query('DELETE FROM rate_limits WHERE key = $1', [key]);
+  } catch (error) {
+    logger.error('Error al resetear rate limit en BD:', error);
+  }
+}
+

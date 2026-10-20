@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createSession, COOKIE_NAME, COOKIE_OPTIONS, ABSOLUTE_TIMEOUT_MS } from '../../../../lib/auth';
-import { checkRateLimit, getClientIp } from '../../../../lib/rate-limit';
+import { checkRateLimit, resetRateLimit, getClientIp } from '../../../../lib/rate-limit';
 import { withErrorHandler } from '../../../../lib/api-handler';
 import { logSecurityEvent } from '../../../../lib/security-logger';
 
@@ -23,8 +23,8 @@ async function loginHandler(request: Request) {
   const ip = getClientIp(request);
   const userAgent = request.headers.get('user-agent') || 'unknown';
 
-  // 1. Rate Limiting persistente en BD: máximo 5 intentos en 15 minutos por IP
-  const rateLimit = await checkRateLimit(`login:${ip}`, 5, 15 * 60);
+  // 1. Rate Limiting persistente en BD: máximo 15 intentos en 15 minutos por IP
+  const rateLimit = await checkRateLimit(`login:${ip}`, 15, 15 * 60);
   if (!rateLimit.success) {
     // Registrar el evento permanente de bloqueo y disparar alerta por correo si aplica
     await logSecurityEvent({
@@ -32,7 +32,7 @@ async function loginHandler(request: Request) {
       ip,
       path: '/api/admin/login',
       details: {
-        attempts: 5,
+        attempts: 15,
         resetAt: rateLimit.resetAt,
         message: 'Límite de intentos superado. IP bloqueada por 15 minutos.',
       },
@@ -78,6 +78,9 @@ async function loginHandler(request: Request) {
     await delay(1200);
     return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 });
   }
+
+  // Contraseña correcta: limpiar inmediatamente el rate limit para esta IP
+  await resetRateLimit(`login:${ip}`);
 
   // Passwords match, create session
   const sessionToken = await createSession();
