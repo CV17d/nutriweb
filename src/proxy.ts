@@ -23,8 +23,8 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  // Protect /api/admin routes (except /api/admin/login)
-  if (pathname.startsWith('/api/admin') && !pathname.startsWith('/api/admin/login')) {
+  // Protect /api/admin routes (except /api/admin/login and /api/admin/logout)
+  if (pathname.startsWith('/api/admin') && !pathname.startsWith('/api/admin/login') && !pathname.startsWith('/api/admin/logout')) {
     const verified = await verifySession(sessionValue);
     
     if (!verified || verified.role !== 'admin') {

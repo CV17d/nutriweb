@@ -8,7 +8,20 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch (err) {
+      console.error('Error cerrando sesión:', err);
+    } finally {
+      window.location.href = '/gestion-andres/login';
+    }
+  };
 
   // Monitor de inactividad de 2 horas e interceptor de 401 en el cliente
   useEffect(() => {
@@ -69,6 +82,7 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
               <Link 
                 key={link.name} 
                 href={link.href}
+                prefetch={false}
                 onClick={() => setIsSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-DEFAULT transition-colors font-medium ${
                   isActive 
@@ -86,20 +100,22 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
           <Link 
             href="/" 
             replace
-            prefetch={true}
+            prefetch={false}
             onClick={() => setIsSidebarOpen(false)}
             className="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors font-medium w-full"
           >
             <span className="material-symbols-outlined">home</span>
             Ver Sitio Web
           </Link>
-          <Link 
-            href="/api/admin/logout" 
-            className="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors font-medium w-full"
+          <button 
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex items-center gap-3 px-4 py-3 rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors font-medium w-full text-left disabled:opacity-50 cursor-pointer"
           >
             <span className="material-symbols-outlined">logout</span>
-            Cerrar Sesión
-          </Link>
+            {isLoggingOut ? 'Cerrando sesión...' : 'Cerrar Sesión'}
+          </button>
         </div>
       </aside>
 
