@@ -118,7 +118,8 @@ async function processPaymentConfirmation({
     if (!isApproved || !isTxIdMatching || !isAmountMatching) {
       logger.warn({ 
         message: 'Confirmación de Payphone rechazada o inconsistente', 
-        confirmResult, 
+        statusCode: confirmResult.statusCode,
+        transactionStatus: confirmResult.transactionStatus,
         expectedAmountInCents,
         clientTransactionId 
       });
@@ -192,8 +193,8 @@ async function processPaymentConfirmation({
     if (appointmentType) successUrl.searchParams.set('appointmentType', appointmentType);
     
     return NextResponse.redirect(successUrl);
-  } catch (error) {
-    logger.error('Error procesando callback y confirmación de Payphone', error);
+  } catch (error: any) {
+    logger.error('[Checkout Callback Error]: Error procesando callback y confirmación de Payphone', error?.message || error);
     // En caso de excepción, liberar el estado de bloqueo
     await releaseTransactionProcessing(clientTransactionId).catch(() => {});
 

@@ -10,6 +10,38 @@ interface LogPayload {
   [key: string]: any;
 }
 
+const SENSITIVE_KEY_PATTERNS = [
+  /password/i,
+  /secret/i,
+  /token/i,
+  /authorization/i,
+  /cookie/i,
+  /private_?key/i,
+  /credential/i,
+];
+
+function sanitizePayload(value: any, depth = 0): any {
+  if (depth > 5 || value === null || value === undefined) return value;
+  if (typeof value !== 'object') return value;
+
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizePayload(item, depth + 1));
+  }
+
+  const sanitized: Record<string, any> = {};
+  for (const [key, val] of Object.entries(value)) {
+    const isSensitive = SENSITIVE_KEY_PATTERNS.some((pattern) => pattern.test(key));
+    if (isSensitive && typeof val === 'string' && val.length > 0) {
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof val === 'object' && val !== null) {
+      sanitized[key] = sanitizePayload(val, depth + 1);
+    } else {
+      sanitized[key] = val;
+    }
+  }
+  return sanitized;
+}
+
 class BaseLogger {
   private log(level: LogLevel, payload: LogPayload | string) {
     const timestamp = new Date().toISOString();
@@ -21,7 +53,7 @@ class BaseLogger {
     if (typeof payload === 'string') {
       logEntry.message = payload;
     } else {
-      logEntry = { ...logEntry, ...payload };
+      logEntry = { ...logEntry, ...sanitizePayload(payload) };
     }
 
     // Convertimos a JSON para estructuración
@@ -52,16 +84,28 @@ class BaseLogger {
   }
 
   error(payload: LogPayload | string, error?: any) {
-    if (error && error instanceof Error) {
-      this.log('error', {
-        ...(typeof payload === 'string' ? { message: payload } : payload),
-        errorName: error.name,
-        errorMessage: error.message,
-        stack: error.stack, // En producción puedes ocultar esto si lo deseas
-      });
-    } else {
-      this.log('error', payload);
+    const basePayload = typeof payload === 'string' ? { message: payload } : payload;
+    let errorDetails: Record<string, any> = {};
+
+    if (error) {
+      if (error instanceof Error) {
+        errorDetails = {
+          errorName: error.name,
+          errorMessage: error.message,
+          ...(process.env.NODE_ENV !== 'production' ? { stack: error.stack } : {}),
+        };
+      } else if (typeof error === 'object') {
+        errorDetails = {
+          errorMessage: error.message || error.error || error.description || JSON.stringify(sanitizePayload(error)),
+        };
+      } else {
+        errorDetails = {
+          errorMessage: String(error),
+        };
+      }
     }
+
+    this.log('error', { ...basePayload, ...errorDetails });
   }
 
   debug(payload: LogPayload | string) {

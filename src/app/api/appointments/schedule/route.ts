@@ -48,8 +48,6 @@ async function postHandler(request: Request) {
       logger.warn({
         message: 'Intento de acceso no autorizado (posible IDOR) detectado en agendamiento',
         requestedClientId: clientId,
-        requestedEmail: clientEmail,
-        actualEmail: existingUser.email
       });
       return NextResponse.json({
         success: false,

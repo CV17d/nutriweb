@@ -50,7 +50,7 @@ async function postHandler(request: Request) {
       [user_id, subscription_id]
     );
   } catch (dbError: any) {
-    logger.error('Error al consultar base de datos en send-link:', dbError);
+    logger.error('[Admin SendLink Error]: Error al consultar base de datos en send-link', dbError?.message || dbError);
     const isNetworkErr = dbError.code === 'ETIMEDOUT' || dbError.code === 'ECONNREFUSED' || dbError.message?.includes('timeout');
     return NextResponse.json(
       { 
@@ -79,7 +79,7 @@ async function postHandler(request: Request) {
       baseUrl
     );
   } catch (emailError: any) {
-    logger.error('Error enviando correo en send-link:', emailError);
+    logger.error('[Admin SendLink Error]: Error enviando correo en send-link', emailError?.message || emailError);
     return NextResponse.json(
       { 
         error: 'Error al enviar correo', 

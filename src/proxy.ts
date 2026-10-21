@@ -44,8 +44,8 @@ export default async function proxy(request: NextRequest) {
     if (verified && Date.now() - verified.lastActive > 2 * 60 * 1000) {
       try {
         refreshedToken = await signRefreshedSession(verified);
-      } catch (err) {
-        logger.error('Error refrescando sesión deslizante en proxy', err);
+      } catch (err: any) {
+        logger.error('[Proxy Error]: Error refrescando sesión deslizante en proxy', err?.message || err);
       }
     }
   }

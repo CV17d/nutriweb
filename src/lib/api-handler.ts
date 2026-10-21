@@ -14,10 +14,15 @@ export function withErrorHandler(handler: ApiHandler): ApiHandler {
       return await handler(req, ...args);
     } catch (error: any) {
       // 1. Auditoría: Registramos el error internamente de forma confidencial
+      let path = req.url;
+      try {
+        path = new URL(req.url).pathname;
+      } catch {}
+
       logger.error({
         message: 'Error no controlado en Endpoint API',
         method: req.method,
-        url: req.url,
+        path,
       }, error);
 
       // 2. Seguridad: Devolvemos un mensaje genérico limpio sin exponer internals

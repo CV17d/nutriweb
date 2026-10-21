@@ -76,8 +76,8 @@ export async function checkRateLimit(
       remaining: Math.max(0, maxRequests - count),
       resetAt: resetDate,
     };
-  } catch (error) {
-    logger.error('Error al verificar rate limit persistente en BD:', error);
+  } catch (error: any) {
+    logger.error('[RateLimit Error]: Error al verificar rate limit persistente en BD', error?.message || error);
     // En caso de fallo transitorio en base de datos, permitir continuar para no bloquear usuarios legítimos
     return {
       success: true,

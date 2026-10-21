@@ -37,8 +37,8 @@ async function verifyHandler(request: Request) {
 
     // Redirigir a la página de éxito pasando el enlace y modalidad
     return NextResponse.redirect(new URL(`/verify-success?status=success&gcalUrl=${encodeURIComponent(gcalUrl)}&type=${encodeURIComponent(appointment.type || 'Virtual')}`, request.url));
-  } catch (error) {
-    logger.error('Error al verificar la cita:', error);
+  } catch (error: any) {
+    logger.error('[Appointments Error]: Error al verificar la cita', error?.message || error);
     return NextResponse.redirect(new URL('/verify-success?error=invalid_token', request.url));
   }
 }

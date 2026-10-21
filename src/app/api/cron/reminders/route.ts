@@ -67,8 +67,8 @@ async function cronHandler(request: Request) {
         is2Hours
       );
       sentCount++;
-    } catch (err) {
-      logger.error(`Error enviando recordatorio a ${appt.email}:`, err);
+    } catch (err: any) {
+      logger.error(`[Reminders Error]: Error enviando recordatorio para cita ${appt.id}:`, err?.message || err);
     }
   }
 

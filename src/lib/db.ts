@@ -18,8 +18,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Manejar errores en clientes inactivos para prevenir caídas silenciosas
-pool.on('error', (err) => {
-  console.error('Error inesperado en cliente inactivo de Postgres:', err);
+pool.on('error', (err: any) => {
+  console.error('[DB Error]: Error inesperado en cliente inactivo de Postgres:', err?.message || err);
 });
 
 /**

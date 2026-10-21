@@ -77,14 +77,15 @@ class PlacetopayService {
 
       const responseData = await response.json();
 
-      if (responseData.status.status !== 'OK') {
-        logger.error('Error desde Placetopay', responseData);
-        throw new Error(responseData.status.message || 'Error al iniciar el pago');
+      if (responseData?.status?.status !== 'OK') {
+        const errMsg = responseData?.status?.message || 'Error al iniciar el pago';
+        logger.error(`[Placetopay Error]: Error desde pasarela: ${errMsg}`);
+        throw new Error(errMsg);
       }
 
       return responseData; // Retorna requestId y processUrl
-    } catch (error) {
-      logger.error('Fallo de conexión con Placetopay', error);
+    } catch (error: any) {
+      logger.error('[Placetopay Error]: Fallo de conexión con Placetopay', error?.message || error);
       throw error;
     }
   }
@@ -105,8 +106,8 @@ class PlacetopayService {
 
       const responseData = await response.json();
       return responseData; // status object
-    } catch (error) {
-      logger.error('Fallo al obtener estado de Placetopay', error);
+    } catch (error: any) {
+      logger.error('[Placetopay Error]: Fallo al obtener estado de Placetopay', error?.message || error);
       throw error;
     }
   }

@@ -61,11 +61,16 @@ class PayphoneService {
       });
 
       const data = await response.json();
-      logger.info({ message: 'Respuesta de confirmación de Payphone', data });
+      logger.info({ 
+        message: 'Respuesta de confirmación de Payphone recibida', 
+        statusCode: data?.statusCode,
+        transactionStatus: data?.transactionStatus,
+        clientTransactionId: data?.clientTransactionId 
+      });
 
       return data as PayphoneConfirmResponse;
-    } catch (error) {
-      logger.error('Error al comunicarse con la API de Confirmación de Payphone', error);
+    } catch (error: any) {
+      logger.error('[Payphone Error]: Error al comunicarse con la API de Confirmación de Payphone', error?.message || error);
       throw error;
     }
   }

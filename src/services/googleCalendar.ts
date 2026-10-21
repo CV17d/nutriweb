@@ -93,8 +93,8 @@ export async function createAppointmentEvent(
     const hangoutLink = response.data.hangoutLink || '';
 
     return { ...response.data, hangoutLink };
-  } catch (error) {
-    logger.error('Error al crear el evento en Google Calendar', error);
+  } catch (error: any) {
+    logger.error('[GoogleCalendar Error]: Error al crear el evento en Google Calendar', error?.message || error);
     throw error;
   }
 }
@@ -124,8 +124,8 @@ export async function getBusySlots(dateStr: string) {
       start: event.start?.dateTime ? new Date(event.start.dateTime) : null,
       end: event.end?.dateTime ? new Date(event.end.dateTime) : null,
     })).filter(slot => slot.start && slot.end);
-  } catch (error) {
-    logger.error('Error consultando disponibilidad en Google Calendar', error);
+  } catch (error: any) {
+    logger.error('[GoogleCalendar Error]: Error consultando disponibilidad en Google Calendar', error?.message || error);
     return []; // Fallback a mostrar todos los horarios si la API falla
   }
 }

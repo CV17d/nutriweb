@@ -45,8 +45,8 @@ export async function createAppointment(params: CreateAppointmentParams) {
   if (!isFreeConsultation && subscriptionId) {
     try {
       await consumeSession(subscriptionId);
-    } catch (error) {
-      logger.error('Error al consumir sesión de suscripción. Revirtiendo cita...', error);
+    } catch (error: any) {
+      logger.error('[Appointments Error]: Error al consumir sesión de suscripción. Revirtiendo cita...', error);
       // En un entorno de prod robusto, usaríamos BEGIN y COMMIT para transacción real
       await query('DELETE FROM appointments WHERE id = $1', [appointmentId]);
       throw error;
@@ -78,9 +78,9 @@ export async function createAppointment(params: CreateAppointmentParams) {
         appointmentType,
         meetLink
       );
-    } catch (error) {
+    } catch (error: any) {
       // Si Google Calendar falla, no eliminamos la cita de la BD (Eventual consistency / Dead letter)
-      logger.error({ message: 'Fallo al crear evento en GCal o enviar correo de confirmación. La cita sí está en BD.', appointmentId }, error);
+      logger.error({ message: '[Appointments Error]: Fallo al crear evento en GCal o enviar correo de confirmación', appointmentId }, error);
     }
   }
 
@@ -137,8 +137,8 @@ export async function confirmFreeAppointment(token: string) {
 
     // En lugar de enviar un segundo correo, retornamos los datos para que 
     // la página web muestre el botón de agregar a Google Calendar.
-  } catch (error) {
-    logger.error({ message: 'Fallo al crear evento en GCal durante la confirmación.', appointmentId: appointment.id }, error);
+  } catch (error: any) {
+    logger.error({ message: '[Appointments Error]: Fallo al crear evento en GCal durante la confirmación', appointmentId: appointment.id }, error);
   }
 
   return {

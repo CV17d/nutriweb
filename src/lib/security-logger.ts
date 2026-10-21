@@ -49,8 +49,8 @@ export async function logSecurityEvent({
     if (eventType === 'LOGIN_RATE_LIMIT_EXCEEDED' || eventType === 'BRUTE_FORCE_BLOCKED') {
       await handleLoginSecurityAlert(ip, path, details, userAgent, timestamp);
     }
-  } catch (error) {
-    logger.error('Error al registrar evento en security_audit_logs', error);
+  } catch (error: any) {
+    logger.error('[Security Error]: Error al registrar evento en security_audit_logs', error?.message || error);
   }
 }
 
@@ -106,8 +106,8 @@ async function handleLoginSecurityAlert(
       userAgent,
     });
 
-    logger.info({ message: 'Correo de alerta de seguridad enviado al administrador', adminEmail, ip });
-  } catch (emailError) {
-    logger.error('Error al procesar alerta de seguridad por correo', emailError);
+    logger.info({ message: 'Correo de alerta de seguridad enviado al administrador', ip });
+  } catch (emailError: any) {
+    logger.error('[Security Error]: Error al procesar alerta de seguridad por correo', emailError?.message || emailError);
   }
 }

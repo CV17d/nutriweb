@@ -62,14 +62,14 @@ export async function sendVerificationEmail(
     });
 
     if (error) {
-      logger.error('Error enviando correo de verificación con Resend:', error);
+      logger.error('[Email Error]: Error enviando correo de verificación con Resend', error);
       throw new Error('No se pudo enviar el correo de verificación');
     }
 
-    logger.info({ message: 'Correo de verificación enviado exitosamente', email, id: data?.id });
+    logger.info({ message: 'Correo de verificación enviado exitosamente', id: data?.id });
     return data;
   } catch (error) {
-    logger.error('Excepción enviando correo de verificación:', error);
+    logger.error('[Email Error]: Excepción enviando correo de verificación', error);
     throw error;
   }
 }
@@ -150,14 +150,14 @@ export async function sendFinalConfirmationEmail(
     });
 
     if (error) {
-      logger.error('Error enviando correo de confirmación final con Resend:', error);
+      logger.error('[Email Error]: Error enviando correo de confirmación final con Resend', error);
       throw new Error('No se pudo enviar el correo de confirmación');
     }
 
-    logger.info({ message: 'Correo final de confirmación enviado exitosamente', email, id: data?.id });
+    logger.info({ message: 'Correo final de confirmación enviado exitosamente', id: data?.id });
     return data;
   } catch (error) {
-    logger.error('Excepción enviando correo de confirmación final:', error);
+    logger.error('[Email Error]: Excepción enviando correo de confirmación final', error);
     throw error;
   }
 }
@@ -205,12 +205,12 @@ export async function sendSubscriptionLinkEmail(
     });
 
     if (error) {
-      logger.error('Error enviando correo de agenda exclusiva:', error);
+      logger.error('[Email Error]: Error enviando correo de agenda exclusiva', error);
       throw new Error('No se pudo enviar el correo de agenda');
     }
     return data;
   } catch (error) {
-    logger.error('Excepción enviando correo de agenda exclusiva:', error);
+    logger.error('[Email Error]: Excepción enviando correo de agenda exclusiva', error);
     throw error;
   }
 }
@@ -265,7 +265,7 @@ export async function sendReminderEmail(
     if (error) throw new Error('No se pudo enviar el correo de recordatorio');
     return data;
   } catch (error) {
-    logger.error('Excepción enviando recordatorio:', error);
+    logger.error('[Email Error]: Excepción enviando recordatorio', error);
     throw error;
   }
 }
@@ -318,12 +318,12 @@ export async function sendSecurityAlertEmail(
     });
 
     if (error) {
-      logger.error('Error enviando alerta de seguridad por correo:', error);
+      logger.error('[Email Error]: Error enviando alerta de seguridad por correo', error);
       return null;
     }
     return data;
   } catch (error) {
-    logger.error('Excepción al intentar enviar correo de alerta de seguridad:', error);
+    logger.error('[Email Error]: Excepción al intentar enviar correo de alerta de seguridad', error);
     return null;
   }
 }

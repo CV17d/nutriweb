@@ -25,7 +25,7 @@ export default function AdminLayoutUI({ children }: { children: React.ReactNode 
 
   // Monitor de inactividad de 2 horas e interceptor de 401 en el cliente
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const INACTIVITY_LIMIT_MS = 2 * 60 * 60 * 1000; // 2 horas (consistente con el backend)
 
     const resetTimer = () => {
