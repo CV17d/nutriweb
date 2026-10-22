@@ -1,7 +1,7 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Términos y Condiciones del Servicio | Andrés Burbano Nutrición",
+  title: 'Términos y Condiciones',
   description: "Conoce los términos que regulan la contratación de planes nutricionales, citas y el uso de nuestra plataforma.",
 };
 

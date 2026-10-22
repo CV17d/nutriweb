@@ -22,11 +22,37 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Andrés Burbano | Nutricionista Deportivo y Clínico en Quito",
-  description: "Planes de nutrición deportiva basados en evidencia científica, antropometría ISAK 2 y acompañamiento integral en Quito y virtual.",
-  keywords: ["nutricionista deportivo", "nutrición quito", "andres burbano nutricionista", "antropometria isak 2", "planes nutricionales ecuador"],
+  metadataBase: new URL('https://andresburbanonutricionista.com'),
+  title: {
+    default: 'Andrés Burbano | Nutricionista Clínico en Pasto y Online',
+    template: '%s | Andrés Burbano Nutricionista',
+  },
+  description: 'Consulta nutricional personalizada presencial en Pasto y asesoría online. Planes de alimentación para pérdida de grasa, composición corporal y nutrición clínica basada en evidencia.',
+  keywords: [
+    'Nutricionista en Pasto',
+    'Nutricionista Pasto',
+    'Nutricionista clínico Pasto',
+    'Consulta nutricional online',
+    'Planes de alimentación Pasto',
+    'Andrés Burbano Nutricionista',
+  ],
   authors: [{ name: "Andrés Burbano" }],
   creator: "Andrés Burbano",
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'Andrés Burbano | Nutricionista Clínico en Pasto y Online',
+    description: 'Planes nutricionales personalizados y basados en evidencia. Atención presencial en Pasto y online.',
+    url: 'https://andresburbanonutricionista.com',
+    siteName: 'Andrés Burbano Nutricionista',
+    locale: 'es_CO',
+    type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },

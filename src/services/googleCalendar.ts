@@ -18,6 +18,49 @@ const auth = new google.auth.JWT({
 
 const calendar = google.calendar({ version: 'v3', auth });
 
+/**
+ * Formatea una fecha a formato ISO 8601 con el offset explícito de Colombia (-05:00).
+ * Ejemplo: 2026-10-22T10:00:00-05:00
+ */
+export function formatBogotaISO(date: Date): string {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(date);
+  const getPart = (type: string) => parts.find((p) => p.type === type)?.value || '00';
+
+  const year = getPart('year');
+  const month = getPart('month');
+  const day = getPart('day');
+  let hour = getPart('hour');
+  if (hour === '24') hour = '00';
+  const minute = getPart('minute');
+  const second = getPart('second');
+
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}-05:00`;
+}
+
+/**
+ * Obtiene la fecha YYYY-MM-DD en la zona horaria de Colombia ('America/Bogota').
+ */
+export function formatBogotaDateStr(date: Date): string {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  return formatter.format(date);
+}
+
 export async function createAppointmentEvent(
   clientEmail: string,
   clientName: string,
@@ -55,31 +98,17 @@ export async function createAppointmentEvent(
       description: eventDescription,
       location: isPresencial ? clinicLink : (meetLink || 'Enlace de videollamada enviado al paciente'),
       start: {
-        dateTime: date.toISOString(),
+        dateTime: formatBogotaISO(date),
+        timeZone: 'America/Bogota',
       },
       end: {
-        dateTime: endTime.toISOString(),
+        dateTime: formatBogotaISO(endTime),
+        timeZone: 'America/Bogota',
       },
       reminders: {
         useDefault: true,
       },
     };
-
-    /*
-    // Deshabilitado: Google Calendar API no permite generar enlaces de Meet automáticamente
-    // a través de Service Accounts a menos que tengan Google Workspace (G Suite).
-    // Con cuentas @gmail.com gratuitas arroja "Invalid conference type value".
-    if (appointmentType === 'Virtual') {
-      event.conferenceData = {
-        createRequest: {
-          requestId: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
-          conferenceSolutionKey: {
-            type: 'hangoutsMeet'
-          }
-        }
-      };
-    }
-    */
 
     const response = await calendar.events.insert({
       calendarId,
@@ -94,6 +123,7 @@ export async function createAppointmentEvent(
 
     return { ...response.data, hangoutLink };
   } catch (error: any) {
+    console.error('Error detallado al agendar (Google Calendar createAppointmentEvent):', error);
     logger.error('[GoogleCalendar Error]: Error al crear el evento en Google Calendar', error?.message || error);
     throw error;
   }
@@ -104,29 +134,99 @@ export async function getBusySlots(dateStr: string) {
     const calendarId = process.env.GOOGLE_CALENDAR_ID;
     if (!calendarId) return [];
 
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const startOfDay = new Date(year, month - 1, day);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(year, month - 1, day);
-    endOfDay.setHours(23, 59, 59, 999);
+    // dateStr representa YYYY-MM-DD en hora de Colombia (America/Bogota, UTC-5)
+    // Cubrimos el día completo de 00:00 a 23:59:59.999 en hora de Bogotá
+    const timeMin = new Date(`${dateStr}T00:00:00-05:00`).toISOString();
+    const timeMax = new Date(`${dateStr}T23:59:59.999-05:00`).toISOString();
 
     const response = await calendar.events.list({
       calendarId,
-      timeMin: startOfDay.toISOString(),
-      timeMax: endOfDay.toISOString(),
+      timeMin,
+      timeMax,
+      timeZone: 'America/Bogota',
       singleEvents: true,
       orderBy: 'startTime',
     });
 
     const events = response.data.items || [];
-    return events.map(event => ({
-      start: event.start?.dateTime ? new Date(event.start.dateTime) : null,
-      end: event.end?.dateTime ? new Date(event.end.dateTime) : null,
-    })).filter(slot => slot.start && slot.end);
+    return events.map(event => {
+      const startStr = event.start?.dateTime || (event.start?.date ? `${event.start.date}T00:00:00-05:00` : null);
+      const endStr = event.end?.dateTime || (event.end?.date ? `${event.end.date}T23:59:59-05:00` : null);
+      return {
+        start: startStr ? new Date(startStr) : null,
+        end: endStr ? new Date(endStr) : null,
+      };
+    }).filter((slot): slot is { start: Date; end: Date } => 
+      slot.start !== null && slot.end !== null && !isNaN(slot.start.getTime()) && !isNaN(slot.end.getTime())
+    );
   } catch (error: any) {
+    console.error('Error detallado al agendar (Google Calendar getBusySlots):', error);
     logger.error('[GoogleCalendar Error]: Error consultando disponibilidad en Google Calendar', error?.message || error);
     return []; // Fallback a mostrar todos los horarios si la API falla
+  }
+}
+
+/**
+ * Elimina un evento de Google Calendar por su eventId.
+ * No arroja error si el evento ya fue eliminado previamente (404/410).
+ */
+export async function deleteAppointmentEvent(eventId: string): Promise<boolean> {
+  try {
+    const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
+    await calendar.events.delete({
+      calendarId,
+      eventId,
+    });
+    logger.info({ message: 'Evento de Google Calendar eliminado con éxito', eventId });
+    return true;
+  } catch (error: any) {
+    const status = error.code || error.status || error?.response?.status;
+    if (status === 404 || status === 410) {
+      console.warn('El evento ya no existía en Google Calendar:', eventId);
+      logger.warn({ message: 'El evento ya no existía en Google Calendar al intentar eliminarlo', eventId });
+      return true;
+    }
+    console.error('Error al eliminar evento en Google Calendar:', error);
+    logger.error('[GoogleCalendar Error]: Error al eliminar evento', error?.message || error);
+    return false;
+  }
+}
+
+/**
+ * Busca y elimina un evento en Google Calendar por fecha y nombre/correo del paciente.
+ * Útil como fallback para citas antiguas que no tengan google_event_id guardado.
+ */
+export async function findAndDeleteEventByDate(date: Date, clientIdentifier?: string): Promise<boolean> {
+  try {
+    const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
+    const timeMin = new Date(date.getTime() - 15 * 60000).toISOString();
+    const timeMax = new Date(date.getTime() + 15 * 60000).toISOString();
+
+    const response = await calendar.events.list({
+      calendarId,
+      timeMin,
+      timeMax,
+      singleEvents: true,
+    });
+
+    const events = response.data.items || [];
+    for (const evt of events) {
+      if (evt.id) {
+        const matchesIdentifier = !clientIdentifier ||
+          (evt.summary && evt.summary.toLowerCase().includes(clientIdentifier.toLowerCase())) ||
+          (evt.description && evt.description.toLowerCase().includes(clientIdentifier.toLowerCase())) ||
+          events.length === 1;
+
+        if (matchesIdentifier) {
+          await deleteAppointmentEvent(evt.id);
+          return true;
+        }
+      }
+    }
+    return false;
+  } catch (err: any) {
+    console.warn('No se pudo buscar/eliminar evento por fecha en Google Calendar:', err?.message || err);
+    return false;
   }
 }
 

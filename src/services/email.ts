@@ -10,6 +10,21 @@ function getResendClient(): Resend {
 }
 
 /**
+ * Obtiene la URL base de la aplicación asegurando el uso del dominio de producción
+ * y evitando enlaces rotos hacia localhost:3000 en correos.
+ */
+function getAppBaseUrl(customUrl?: string): string {
+  if (customUrl && !customUrl.includes('localhost')) {
+    return customUrl.replace(/\/$/, '');
+  }
+  const candidate = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL;
+  if (candidate && !candidate.includes('localhost')) {
+    return candidate.replace(/\/$/, '');
+  }
+  return 'https://andresburbanonutricionista.com';
+}
+
+/**
  * Envía un correo de verificación para confirmar la cita gratuita.
  */
 export async function sendVerificationEmail(
@@ -17,20 +32,23 @@ export async function sendVerificationEmail(
   name: string,
   token: string,
   appointmentDate: Date,
-  appointmentType: string
+  appointmentType: string,
+  customBaseUrl?: string
 ) {
   try {
-    const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const verifyUrl = `${appUrl}/api/appointments/verify?token=${token}`;
+    const appUrl = getAppBaseUrl(customBaseUrl);
+    const verifyUrl = `${appUrl}/api/appointments/verify?token=${encodeURIComponent(token.trim())}`;
 
-    // Formatear fecha para el correo
-    const dateStr = appointmentDate.toLocaleString('es-ES', {
+    // Formatear fecha para el correo en hora de Colombia (America/Bogota)
+    const dateStr = appointmentDate.toLocaleString('es-CO', {
+      timeZone: 'America/Bogota',
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true,
     });
 
     const resend = getResendClient();
@@ -85,13 +103,16 @@ export async function sendFinalConfirmationEmail(
   meetLink: string
 ) {
   try {
-    const dateStr = appointmentDate.toLocaleString('es-ES', {
+    // Formatear fecha para el correo en hora de Colombia (America/Bogota)
+    const dateStr = appointmentDate.toLocaleString('es-CO', {
+      timeZone: 'America/Bogota',
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true,
     });
 
     const endTime = new Date(appointmentDate.getTime() + 120 * 60000); // 2 horas
@@ -175,7 +196,7 @@ export async function sendSubscriptionLinkEmail(
   customBaseUrl?: string
 ) {
   try {
-    const appUrl = customBaseUrl || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const appUrl = getAppBaseUrl(customBaseUrl);
     const agendaUrl = `${appUrl}/agenda/${subscriptionId}`;
 
     const message = sessionsUsed <= 1
@@ -324,6 +345,85 @@ export async function sendSecurityAlertEmail(
     return data;
   } catch (error) {
     logger.error('[Email Error]: Excepción al intentar enviar correo de alerta de seguridad', error);
+    return null;
+  }
+}
+
+/**
+ * Envía un correo notificando al paciente la cancelación de su cita nutricional.
+ */
+export async function sendCancellationEmail(
+  email: string,
+  name: string,
+  appointmentDate: Date,
+  reason?: string
+) {
+  try {
+    if (!email) return null;
+
+    const dateStr = appointmentDate.toLocaleString('es-CO', {
+      timeZone: 'America/Bogota',
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+    const resend = getResendClient();
+    const { data, error } = await resend.emails.send({
+      from: 'Andrés Burbano Nutrición <citas@andresburbanonutricionista.com>',
+      to: [email],
+      subject: 'Cancelación de Cita Nutricional - Andrés Burbano',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1f2937; border: 1px solid #fee2e2; border-radius: 12px; background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: inline-block; background-color: #fef2f2; color: #ef4444; border-radius: 50%; padding: 12px; margin-bottom: 12px;">
+              <span style="font-size: 28px;">📅❌</span>
+            </div>
+            <h2 style="color: #991b1b; margin: 0; font-size: 20px;">Tu cita ha sido cancelada</h2>
+          </div>
+
+          <p>Hola <strong>${name || 'Paciente'}</strong>,</p>
+          <p>Te informamos que tu cita programada para el <strong>${dateStr}</strong> ha sido cancelada.</p>
+          
+          ${reason ? `
+          <div style="background-color: #f9fafb; padding: 12px 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #6b7280;">
+            <p style="margin: 0; font-size: 14px; color: #374151;"><strong>Motivo:</strong> ${reason}</p>
+          </div>
+          ` : ''}
+
+          <div style="background-color: #fef2f2; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+            <p style="margin: 0; color: #991b1b; font-size: 14px; line-height: 1.5;">
+              Si deseas reprogramar tu consulta o necesitas asistencia, puedes responder a este correo o agendar una nueva franja disponible a través de nuestro sitio web.
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="https://andresburbanonutricionista.com" style="background-color: #0052FF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 14px;">
+              Ir al Sitio Web
+            </a>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #f3f4f6; margin: 24px 0;" />
+          <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">
+            Consultorio Nutricional Andrés Burbano &bull; Pasto y Atención Online
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      logger.error('[Email Error]: Error enviando correo de cancelación con Resend', error);
+      return null;
+    }
+
+    logger.info({ message: 'Correo de cancelación enviado exitosamente', id: data?.id, to: email });
+    return data;
+  } catch (error: any) {
+    logger.error('[Email Error]: Excepción al enviar correo de cancelación', error?.message || error);
     return null;
   }
 }

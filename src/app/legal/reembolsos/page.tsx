@@ -1,7 +1,7 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Políticas de Cancelación, Reprogramación y Reembolsos | Andrés Burbano Nutrición",
+  title: 'Política de Reembolsos',
   description: "Conoce las normas y tiempos para la reprogramación de citas y condiciones de reembolso de planes contratados.",
 };
 

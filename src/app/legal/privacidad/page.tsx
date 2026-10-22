@@ -1,7 +1,7 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Política de Privacidad y Protección de Datos | Andrés Burbano Nutrición",
+  title: 'Política de Privacidad',
   description: "Conoce cómo recopilamos, protegemos y tratamos tus datos personales conforme a la legislación vigente.",
 };
 

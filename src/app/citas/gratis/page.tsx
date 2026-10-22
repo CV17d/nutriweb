@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import FreeAppointmentForm from "../../../components/FreeAppointmentForm";
 
-export const metadata = {
-  title: "Agenda tu Cita Gratis | Andrés Nutrición",
-  description: "Agenda una consulta nutricional gratuita de evaluación con Andrés Nutrición.",
+export const metadata: Metadata = {
+  title: 'Valoración Gratuita',
+  description: 'Agenda tu primera sesión o valoración inicial sin costo con el nutricionista Andrés Burbano.',
 };
 
 export default function FreeAppointmentPage() {

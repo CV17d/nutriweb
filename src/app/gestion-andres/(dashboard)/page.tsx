@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { query } from '../../../lib/db';
+import UpcomingAppointmentsCard from './UpcomingAppointmentsCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,13 +14,14 @@ async function getDashboardData() {
       monthlyIncomeRes,
       recentTransactionsRes,
       recentAppointmentsRes,
+      upcomingCountRes,
     ] = await Promise.all([
       // 1. Suscripciones activas
       query("SELECT COUNT(*) as count FROM client_subscriptions WHERE status = 'active'"),
-      // 2. Citas agendadas esta semana
-      query("SELECT COUNT(*) as count FROM appointments WHERE appointment_date >= date_trunc('week', CURRENT_DATE)"),
-      // 3. Citas de este mes
-      query("SELECT COUNT(*) as count FROM appointments WHERE appointment_date >= date_trunc('month', CURRENT_DATE)"),
+      // 2. Citas confirmadas agendadas esta semana
+      query("SELECT COUNT(*) as count FROM appointments WHERE status = 'scheduled' AND appointment_date >= date_trunc('week', CURRENT_DATE)"),
+      // 3. Citas confirmadas de este mes
+      query("SELECT COUNT(*) as count FROM appointments WHERE status = 'scheduled' AND appointment_date >= date_trunc('month', CURRENT_DATE)"),
       // 4. Ingresos totales aprobados
       query("SELECT COALESCE(SUM(amount), 0) as total FROM transactions WHERE status = 'success'"),
       // 5. Ingresos de este mes
@@ -39,7 +41,7 @@ async function getDashboardData() {
         ORDER BY t.created_at DESC
         LIMIT 10
       `),
-      // 7. Citas recientes registradas
+      // 7. Próximas citas confirmadas (excluye 'unverified' y 'cancelled', solo futuras en orden ascendente)
       query(`
         SELECT 
           a.id,
@@ -51,9 +53,13 @@ async function getDashboardData() {
           COALESCE(u.email, '') as client_email
         FROM appointments a
         LEFT JOIN users u ON a.client_id = u.id AND a.client_id != '00000000-0000-0000-0000-000000000000'
-        ORDER BY a.appointment_date DESC
-        LIMIT 4
+        WHERE a.status = 'scheduled'
+          AND a.appointment_date >= NOW()
+        ORDER BY a.appointment_date ASC
+        LIMIT 5
       `),
+      // 8. Total de citas futuras confirmadas para el badge del widget
+      query("SELECT COUNT(*) as count FROM appointments WHERE status = 'scheduled' AND appointment_date >= NOW()"),
     ]);
 
     return {
@@ -64,6 +70,7 @@ async function getDashboardData() {
       monthlyIncome: parseFloat(monthlyIncomeRes.rows[0]?.total || '0'),
       recentTransactions: recentTransactionsRes.rows || [],
       recentAppointments: recentAppointmentsRes.rows || [],
+      upcomingAppointmentsCount: parseInt(upcomingCountRes.rows[0]?.count || '0', 10),
     };
   } catch (error) {
     console.error('Error fetching admin dashboard data:', error);
@@ -75,6 +82,7 @@ async function getDashboardData() {
       monthlyIncome: 0,
       recentTransactions: [],
       recentAppointments: [],
+      upcomingAppointmentsCount: 0,
     };
   }
 }
@@ -83,11 +91,13 @@ function formatDate(dateValue: string | Date | null) {
   if (!dateValue) return 'Sin fecha';
   try {
     const d = new Date(dateValue);
-    return d.toLocaleDateString('es-EC', {
+    return d.toLocaleDateString('es-CO', {
+      timeZone: 'America/Bogota',
       day: '2-digit',
       month: 'short',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: true,
     });
   } catch {
     return 'Fecha inválida';
@@ -326,59 +336,11 @@ export default async function AdminDashboard() {
         {/* Barra Lateral Derecha: Citas Próximas y Acceso al Carrusel */}
         <div className="lg:col-span-1 space-y-6">
           
-          {/* Widget de Próximas Citas (Funcional con datos de la BD) */}
-          <div className="bg-brand-navy rounded-2xl p-6 text-on-primary shadow-xs">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-headline-md text-base md:text-lg font-bold flex items-center gap-2 text-white">
-                <span className="material-symbols-outlined text-brand-electric">schedule</span>
-                Próximas Citas
-              </h3>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/10 text-white font-medium">
-                {data.recentAppointments.length} agendadas
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              {data.recentAppointments.length === 0 ? (
-                <p className="text-xs text-white/60 text-center py-4">
-                  No hay citas registradas en el sistema.
-                </p>
-              ) : (
-                data.recentAppointments.map((app: any) => {
-                  const isFree = app.is_free_consultation;
-                  const dateStr = formatDate(app.appointment_date);
-
-                  return (
-                    <div
-                      key={app.id}
-                      className="bg-white/10 rounded-xl p-3.5 border border-white/10 backdrop-blur-sm"
-                    >
-                      <div className="flex justify-between items-start mb-1.5">
-                        <span className="font-bold text-xs text-white">{dateStr}</span>
-                        <span className={`px-2 py-0.5 text-[10px] rounded-full font-bold ${
-                          isFree ? 'bg-amber-400/20 text-amber-300' : 'bg-brand-electric text-white'
-                        }`}>
-                          {isFree ? 'Gratuita' : 'Plan'}
-                        </span>
-                      </div>
-                      <p className="text-white/80 text-xs font-medium">
-                        {app.client_name}
-                      </p>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            <Link
-              href="/gestion-andres/patients"
-              prefetch={false}
-              className="w-full mt-5 py-2.5 px-4 bg-brand-electric hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
-            >
-              <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-              Ver Pacientes y Citas
-            </Link>
-          </div>
+          {/* Widget interactivo de Próximas Citas con Cancelación y Sincronización */}
+          <UpcomingAppointmentsCard
+            initialAppointments={data.recentAppointments}
+            upcomingAppointmentsCount={data.upcomingAppointmentsCount}
+          />
 
           {/* Tarjeta de Acceso Rápido: Carrusel del Consultorio */}
           <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/30 hover:border-brand-electric/50 transition-colors shadow-xs">

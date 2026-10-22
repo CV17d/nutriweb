@@ -98,16 +98,25 @@ export default function FreeAppointmentForm() {
 
     try {
       const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      const dateToSubmit = new Date(year, month, selectedDate);
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const d = String(selectedDate).padStart(2, '0');
+      const dateStr = `${year}-${month}-${d}`;
+
+      let hours = 0;
+      let minutes = 0;
       if (selectedTime) {
         const [time, period] = selectedTime.split(" ");
-        const [parsedHours, minutes] = time.split(":").map(Number);
-        let hours = parsedHours;
+        const [parsedHours, parsedMinutes] = time.split(":").map(Number);
+        hours = parsedHours;
+        minutes = parsedMinutes;
         if (period === "PM" && hours !== 12) hours += 12;
         if (period === "AM" && hours === 12) hours = 0;
-        dateToSubmit.setHours(hours, minutes, 0, 0);
       }
+
+      const pad = (n: number) => String(n).padStart(2, '0');
+      // Anclamos la fecha y hora seleccionada explícitamente a la zona de Colombia (UTC-5)
+      const bogotaIsoString = `${dateStr}T${pad(hours)}:${pad(minutes)}:00-05:00`;
+      const dateToSubmit = new Date(bogotaIsoString);
 
       const res = await fetch("/api/appointments/free", {
         method: "POST",
@@ -115,7 +124,7 @@ export default function FreeAppointmentForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          date: dateToSubmit.toISOString(),
+          date: bogotaIsoString,
           time: selectedTime,
           clientName: formData.fullName,
           clientEmail: formData.email,
@@ -126,7 +135,8 @@ export default function FreeAppointmentForm() {
       });
 
       if (!res.ok) {
-        throw new Error("Error al agendar la cita");
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || data?.error || "Error al agendar la cita");
       }
 
       setStatus("success");

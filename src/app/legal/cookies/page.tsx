@@ -1,7 +1,7 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Política de Cookies y Tecnologías de Rastreo | Andrés Burbano Nutrición",
+  title: 'Política de Cookies',
   description: "Información detallada sobre el uso de cookies técnicas, analíticas y de terceros en nuestra web.",
 };
 
