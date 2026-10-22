@@ -24,16 +24,17 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL('https://andresburbanonutricionista.com'),
   title: {
-    default: 'Andrés Burbano | Nutricionista Clínico en Pasto y Online',
+    default: 'Andrés Burbano | Nutricionista Clínico en Quito y Online',
     template: '%s | Andrés Burbano Nutricionista',
   },
-  description: 'Consulta nutricional personalizada presencial en Pasto y asesoría online. Planes de alimentación para pérdida de grasa, composición corporal y nutrición clínica basada en evidencia.',
+  description: 'Consulta nutricional personalizada, planes clínicos y hábitos sostenibles en Quito y online. Agenda tu primera consulta gratuita.',
   keywords: [
-    'Nutricionista en Pasto',
-    'Nutricionista Pasto',
-    'Nutricionista clínico Pasto',
+    'Nutricionista en Quito',
+    'Nutricionista Quito',
+    'Nutricionista clínico Quito',
+    'Nutricionista Ecuador',
     'Consulta nutricional online',
-    'Planes de alimentación Pasto',
+    'Planes de alimentación Quito',
     'Andrés Burbano Nutricionista',
   ],
   authors: [{ name: "Andrés Burbano" }],
@@ -42,12 +43,26 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'Andrés Burbano | Nutricionista Clínico en Pasto y Online',
-    description: 'Planes nutricionales personalizados y basados en evidencia. Atención presencial en Pasto y online.',
+    title: 'Andrés Burbano | Nutricionista Clínico en Quito y Online',
+    description: 'Consulta nutricional personalizada y planes clínicos en Quito y online. Agenda tu cita gratuita.',
     url: 'https://andresburbanonutricionista.com',
     siteName: 'Andrés Burbano Nutricionista',
-    locale: 'es_CO',
+    locale: 'es_EC',
     type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Andrés Burbano Nutricionista - Planes y Citas Online',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Andrés Burbano | Nutricionista Clínico en Quito y Online',
+    description: 'Consulta nutricional personalizada y planes clínicos en Quito y online. Agenda tu cita gratuita.',
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
@@ -60,6 +75,9 @@ export const metadata: Metadata = {
     ],
     shortcut: '/icon.svg',
     apple: '/icon.svg',
+  },
+  verification: {
+    google: "KzURVakMbwY63jq7nCUYa0Sc0vIUQnqFO3vcjqL1dbc",
   },
 };
 
@@ -74,9 +92,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" 
-          rel="stylesheet" 
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
         />
       </head>
       <body className="min-h-full flex flex-col bg-brand-light text-brand-navy selection:bg-brand-electric/20 selection:text-brand-electric">

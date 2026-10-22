@@ -409,7 +409,7 @@ export async function sendCancellationEmail(
 
           <hr style="border: none; border-top: 1px solid #f3f4f6; margin: 24px 0;" />
           <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">
-            Consultorio Nutricional Andrés Burbano &bull; Pasto y Atención Online
+            Consultorio Nutricional Andrés Burbano &bull; Quito y Atención Online
           </p>
         </div>
       `,
